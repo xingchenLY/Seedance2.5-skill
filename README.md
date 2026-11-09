@@ -20,3 +20,5 @@
 ## 安装包更新约定
 
 `.skill` 和 `.zip` 文件仅作为 Release 附件维护，不提交到源码仓库。更新时覆盖当前 Release 中对应的同名附件，保持下载文件名和链接不变。
+
+资产自动化流程的完整目录更新推送到 `main` 后，GitHub Actions 会自动打包、逐文件校验并覆盖 `v1.0.0` 的对应安装附件。也可在 Actions 的 “Publish asset automation skill” 工作流中手动运行。安装包不提交到仓库。
