@@ -138,6 +138,7 @@ def build_payload(state_path, asset_dir=None, previous_payload=None):
         sheets.append({"name": name, "headers": headers, "rows": rows, "asset_ids": row_ids, "style": style,
                        "content_hash": object_hash([headers, rows, style])})
     return {"schema_version": 1, "state_revision": state["revision"], "sheets": sheets,
+            "workbook_output_dir": request.get("workbook_output_dir") or str(Path(state_path).resolve().parent),
             "unresolved_images": unresolved, "legacy_prompt_verification_required": legacy,
             "content_hash": object_hash([s["content_hash"] for s in sheets])}
 
@@ -152,6 +153,7 @@ def main():
         result = build_payload(args.state, previous_payload=previous)
         atomic_json(args.output, result)
         emit({"ok": True, "output": str(Path(args.output).resolve()),
+              "workbook_output_dir": result["workbook_output_dir"],
               "rows": {s["name"]: len(s["rows"]) for s in result["sheets"]},
               "unresolved_images": result["unresolved_images"],
               "legacy_prompt_verification_required": result["legacy_prompt_verification_required"]})

@@ -73,21 +73,95 @@ class AssetWorkflowTests(unittest.TestCase):
             self.assertEqual(build_payload(self.state_path)["unresolved_images"], [])
             self.assertEqual(read_json(self.state_path)["asset_workflow"], "jumeng")
 
-    def test_unselected_route_blocks_only_new_generation(self):
+    def test_unspecified_image_route_defaults_to_jumeng(self):
         identifier = self.init(asset_workflow=None)[0]["id"]
-        self.assertEqual(self.actions()[identifier], "choose_image_workflow")
-        self.assertEqual(len(build_payload(self.state_path)["sheets"][0]["rows"]), 2)
-        with self.assertRaisesRegex(ValueError, "出图前须选择"):
-            self.event(identifier, "generating", handle="not-authorized")
-        self.assertFalse(validate_request(self.raw)["ready_for_generation"])
+        self.assertEqual(self.actions()[identifier], "choose_jumeng_project")
+        self.assertEqual(validate_request(self.raw)["asset_workflow"], "jumeng")
+        with self.assertRaisesRegex(ValueError, "项目名"):
+            self.event(identifier, "generating", handle="missing-project")
+        self.init(asset_workflow=None, jumeng_project_name="测试项目")
+        self.assertEqual(self.actions()[identifier], "generate")
+        self.event(identifier, "generating", handle="default-jumeng")
+        self.assertEqual(self.actions()[identifier], "wait")
 
-    def test_jumeng_route_blocks_only_new_generation(self):
-        identifier = self.init(asset_workflow="jumeng")[0]["id"]
-        self.assertEqual(self.actions()[identifier], "wait_for_workflow_import")
+    def test_jumeng_portrait_route_allows_generation(self):
+        identifier = self.init(asset_workflow="jumeng", jumeng_project_name="测试项目")[0]["id"]
+        self.assertEqual(self.actions()[identifier], "generate")
         self.assertEqual(len(build_payload(self.state_path)["sheets"][0]["rows"]), 2)
-        with self.assertRaisesRegex(ValueError, "待导入"):
-            self.event(identifier, "generating", handle="must-not-submit")
-        self.assertFalse(validate_request(self.raw)["ready_for_generation"])
+        self.assertTrue(validate_request(self.raw)["ready_for_generation"])
+        self.event(identifier, "generating", handle="jumeng-portrait-task")
+        self.assertEqual(self.actions()[identifier], "wait")
+
+    def test_jumeng_scene_generation_is_supported(self):
+        identifier = self.init(asset_workflow="jumeng", jumeng_project_name="测试项目",
+                               selected_assets={"场景": ["医院"]})[0]["id"]
+        self.assertEqual(self.actions()[identifier], "generate")
+        self.assertTrue(validate_request(self.raw)["ready_for_generation"])
+        self.event(identifier, "generating", handle="jumeng-scene")
+        self.assertEqual(self.actions()[identifier], "wait")
+
+    def test_jumeng_missing_project_blocks_setup_not_tables(self):
+        identifier = self.init(asset_workflow="jumeng")[0]["id"]
+        request = validate_request(self.raw)
+        self.assertTrue(request["jumeng_project_required"])
+        self.assertFalse(request["ready_for_jumeng_setup"])
+        self.assertEqual(self.actions()[identifier], "choose_jumeng_project")
+        self.assertEqual(len(build_payload(self.state_path)["sheets"][0]["rows"]), 2)
+        for workflow, mode in [("codex", "assets"), ("jumeng", "workbook"), ("jumeng", "prompts")]:
+            result = validate_request({**self.raw, "asset_workflow": workflow, "output_mode": mode})
+            self.assertFalse(result["jumeng_project_required"])
+            self.assertFalse(result["ready_for_jumeng_setup"])
+            self.assertEqual(result["jumeng_episode_names"], [])
+
+    def test_default_jumeng_supports_props(self):
+        identifier = self.init(asset_workflow=None, jumeng_project_name="测试项目",
+                               selected_assets={"道具": ["银色钥匙"]})[0]["id"]
+        self.assertEqual(self.actions()[identifier], "generate")
+        self.event(identifier, "generating", handle="jumeng-prop")
+        self.assertEqual(self.actions()[identifier], "wait")
+
+    def test_jumeng_turnaround_waits_for_approved_portrait(self):
+        items = self.init(asset_workflow=None, jumeng_project_name="测试项目",
+                          selected_assets={"人物": [{"name": "艾玛", "count": 1}]},
+                          image_types=["人物", "三视图"])
+        parent = next(x["id"] for x in items if x["kind"] == "original")
+        turn = next(x["id"] for x in items if x["kind"] == "turnaround")
+        self.assertEqual(self.actions()[turn], "wait_for_reference")
+        self.complete_source(parent)
+        self.assertEqual(self.actions()[turn], "wait_for_reference")
+        self.event(parent, "delivered")
+        self.assertEqual(self.actions()[turn], "generate")
+        self.event(turn, "generating", handle="jumeng-turnaround")
+        self.assertEqual(self.actions()[turn], "wait")
+
+    def test_jumeng_project_and_enabled_episode_mapping(self):
+        self.init(asset_workflow="jumeng", jumeng_project_name="  星河  ",
+                  selected_assets=None, image_types=["人物", "三视图", "场景"],
+                  output_root=str(self.folder / "delivery"))
+        result = validate_request(self.raw)
+        self.assertEqual(result["jumeng_project_name"], "星河")
+        self.assertTrue(result["ready_for_jumeng_setup"])
+        self.assertTrue(result["ready_for_generation"])
+        self.assertEqual(result["jumeng_episode_names"], ["人物资产", "场景资产"])
+        self.assertEqual(read_json(self.state_path)["jumeng_project_name"], "星河")
+        result = validate_request({**self.raw, "image_types": ["三视图"]})
+        self.assertEqual(result["jumeng_episode_names"], ["人物资产"])
+        result = validate_request({**self.raw, "image_types": ["道具"]})
+        self.assertEqual(result["jumeng_episode_names"], ["道具资产"])
+        for invalid in (True, 123, [], "项目\n名称"):
+            with self.subTest(invalid=invalid), self.assertRaises(RequestError):
+                validate_request({**self.raw, "jumeng_project_name": invalid})
+
+    def test_jumeng_project_change_requires_reinit_preserves_design(self):
+        identifier = self.init(asset_workflow="jumeng", jumeng_project_name="项目甲")[0]["id"]
+        before = read_json(self.state_path)["assets"][identifier]["design_hash"]
+        self.prepare(jumeng_project_name="项目乙")
+        with self.assertRaisesRegex(ValueError, "重新执行 init"):
+            build_payload(self.state_path)
+        state.initialize(self.state_path, self.request_path, self.plan_path)
+        updated = read_json(self.state_path)
+        self.assertEqual(updated["jumeng_project_name"], "项目乙")
+        self.assertEqual(updated["assets"][identifier]["design_hash"], before)
 
     def test_selecting_codex_preserves_the_prepared_table_and_design(self):
         identifier = self.init(asset_workflow=None)[0]["id"]

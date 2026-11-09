@@ -4,11 +4,11 @@ scripts/asset_state.py 只管理内部进度，不调用出图接口、不导出
 
 ## 仅出图分流，前后步骤共用
 
-asset_workflow 可为 null、codex 或 jumeng。未选或选择剧梦时仍可 init、完整设计、建表，以及检查和保存已有结果；只禁止提交新的图片生成。无有效源图的启用图片分别返回 choose_image_workflow 或 wait_for_workflow_import，缺少提示词仍返回 design。只做表格的条目仍为 text_only。
+asset_workflow 在仅表格／提示词时可为 null；图片请求缺省归一为 jumeng，明确 codex 保留。剧梦项目名齐备后各图片类型进入 preflight/generate 或参考依赖等待队列。旧状态若返回 choose_image_workflow，补默认 jumeng 后重新 init；不询问平台。已有结果继续原检查和保存，text_only 不出图。
 
 首次出图前，按共用流程完成所选资产表的完整计划、检查和本地保存；仅图片请求不强加表格。此时才询问未选的出图流程。选择后更新 request 并 init，相同设计保留完成记录。attempts 记录实际提交时的 asset_workflow，切换当前选择不改写旧图片来源；历史缺项不补造。
 
-图片已返回则继续原有 inspect/save/deliver，不因出图选择未定或剧梦待导入而阻塞后处理。已有 generated 或明确终止事件继续接收；新生成仅在已实现的 Codex 分支提交，剧梦等待用户导入。命名、待审、正式归档和表格覆盖不分叉。
+图片已返回则继续原有 inspect/save/deliver，不因出图选择未定或剧梦待导入而阻塞后处理。已有 generated 或明确终止事件继续接收；新图片提交支持 Codex 和剧梦人物半身定妆照；剧梦先按 jumeng-workflow.md 完成项目名、浏览器、项目和资产剧集准备，再执行已导入步骤。命名、待审、正式归档和表格覆盖不分叉。
 
 ## 地域模式与恢复
 
@@ -60,8 +60,8 @@ state.json 留在工作区，每次事件原子写入并增加 revision；由一
 | design | 本项仍在本次范围内；补全提示词及引用后 init --partial，不可生成或算完成 |
 | preflight | 对当前设计完成四项实际检查，用 preflight 事件或 init 提交，不能跳过后直接生成 |
 | text_only | 本项图片未开启，仍按表格范围补齐提示词；不调用图片工具、不计入未完成图片 |
-| choose_image_workflow | 所选表格已保存后再询问 Codex／剧梦；未选时不提交新出图 |
-| wait_for_workflow_import | 剧梦出图步骤待导入；表格和已有图片后处理继续 |
+| choose_image_workflow | 兼容旧状态：图片请求补默认 jumeng 后重新 init，保留原成果；缺项目名再询问 |
+| choose_jumeng_project | 询问并记录必填 jumeng_project_name，重新 init；不阻塞表格和已有图片后处理 |
 | generate / retry_generation | 检查依赖后提交该项一次独立出图 |
 | wait | 用现有句柄接收结果；等待超时不重发 |
 | wait_for_reference | 先完成／定位引用图；文件哈希改变时重新 init 核对设计 |

@@ -235,6 +235,11 @@ def validate_request(data):
         raise RequestError([str(exc)]) from exc
     errors = []
     result = {"asset_workflow": workflow}
+    project_name = data.get("jumeng_project_name")
+    if project_name is not None and (not isinstance(project_name, str) or any(c in project_name for c in "\r\n")):
+        errors.append("jumeng_project_name 须为单行项目名称，不能用剧名或目录自动代填")
+        project_name = None
+    result["jumeng_project_name"] = (project_name.strip() or None) if isinstance(project_name, str) else None
     try:
         result["region_mode"] = normalize_region_mode(data.get("region_mode"))
     except ValueError as exc:
@@ -372,6 +377,31 @@ def validate_request(data):
         errors.append(str(exc))
     if errors:
         raise RequestError(errors)
+    if result["generate_images"] and workflow is None:
+        workflow = "jumeng"
+        result["asset_workflow"] = workflow
+    # Excel destination is independent of the image archive directory.
+    result["workbook_output_dir"] = None
+    workbook_dir = data.get("workbook_output_dir")
+    if workbook_dir is not None and not isinstance(workbook_dir, str):
+        raise RequestError(["workbook_output_dir 须为 Excel 保存目录的绝对路径"])
+    if isinstance(workbook_dir, str) and workbook_dir.strip():
+        target = Path(workbook_dir.strip()).expanduser()
+        if not target.is_absolute():
+            raise RequestError(["Excel 保存目录必须是绝对路径"])
+        target = target.resolve()
+        ancestor = target
+        while not ancestor.exists() and ancestor != ancestor.parent:
+            ancestor = ancestor.parent
+        if ancestor.exists() and not ancestor.is_dir():
+            raise RequestError(["Excel 保存目录或其上级路径不是目录"])
+        workbook_dir = str(target)
+    else:
+        workbook_dir = None
+    if result["generate_workbook"]:
+        result["workbook_output_dir"] = workbook_dir
+        if result["workbook_output_dir"] is None and result["script"]["kind"] == "file":
+            result["workbook_output_dir"] = str(Path(result["script"]["path"]).parent)
     try:
         result["script_sha256"] = script_hash(data)
     except OSError as exc:
@@ -387,6 +417,14 @@ def validate_request(data):
             result["ready_for_generation"] = result["generate_images"] and workflow == "codex"
         except (ValueError, OSError, KeyError, TypeError) as exc:
             raise RequestError(["正文内容校验失败：" + str(exc)]) from exc
+    jumeng_images = workflow == "jumeng" and result["generate_images"]
+    result["jumeng_project_required"] = jumeng_images and not result["jumeng_project_name"]
+    result["ready_for_jumeng_setup"] = bool(jumeng_images and result["jumeng_project_name"] and result["content_validated"])
+    categories = {x["category"] for x in result.get("resolved_assets", []) if x.get("generate_image")}
+    result["jumeng_episode_names"] = [c + "资产" for c in ("人物", "场景", "道具") if jumeng_images and c in categories]
+    enabled = [x for x in result.get("resolved_assets", []) if x.get("generate_image")]
+    if result["ready_for_jumeng_setup"] and enabled:
+        result["ready_for_generation"] = True
     return {"ok": True, **result}
 
 

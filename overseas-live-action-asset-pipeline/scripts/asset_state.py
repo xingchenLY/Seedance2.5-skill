@@ -146,10 +146,13 @@ def design_fingerprint(prompt, kind, variant, min_short_side, reference_ids, ref
 
 
 def request_signature(request):
-    return object_hash({key: request.get(key) for key in (
+    values = {key: request.get(key) for key in (
         "script_sha256", "asset_workflow", "region_mode", "output_root", "output_mode", "image_types", "generate_images", "save_assets",
         "generate_workbook", "generate_turnarounds", "turnaround_characters", "episodes",
-        "asset_requests", "asset_types", "min_short_side", "resolved_assets")})
+        "asset_requests", "asset_types", "min_short_side", "resolved_assets")}
+    if request.get("asset_workflow") == "jumeng" and request.get("jumeng_project_name"):
+        values["jumeng_project_name"] = request["jumeng_project_name"]
+    return object_hash(values)
 
 
 def require_current_request(state):
@@ -177,7 +180,8 @@ def next_action(state, item):
         if state.get("asset_workflow") is None:
             return "choose_image_workflow"
         if state["asset_workflow"] == "jumeng":
-            return "wait_for_workflow_import"
+            if not state.get("jumeng_project_name"):
+                return "choose_jumeng_project"
     references = references_current(state, item)
     if references is None:
         return "wait_for_reference"
@@ -295,6 +299,7 @@ def initialize(state_path, request_path, plan_path, partial=False):
         validate_dependencies(assets)
         state = {"schema_version": 2, "revision": old["revision"] + 1,
                  "asset_workflow": request["asset_workflow"],
+                 "jumeng_project_name": request.get("jumeng_project_name"),
                  "region_mode": request["region_mode"],
                  "script_sha256": request["script_sha256"], "request_path": str(Path(request_path).resolve()),
                  "output_root": request["output_root"], "save_assets": request["save_assets"],
@@ -381,8 +386,9 @@ def record_event(state_path, event):
                 raise ValueError("先完成提示词，且不能在生成途中更改检查结论")
             item["preflight"] = checked_preflight(event.get("checks"), item["design_hash"])
         elif operation == "generating":
-            if state.get("asset_workflow") != "codex":
-                raise ValueError("出图前须选择 Codex 或剧梦；剧梦流程待导入，当前不能提交新的图片生成")
+            supported = state.get("asset_workflow") == "codex" or (state.get("asset_workflow") == "jumeng" and state.get("jumeng_project_name"))
+            if not supported:
+                raise ValueError("出图前须确定流程并填写剧梦项目名")
             if action not in {"generate", "retry_generation"}:
                 raise ValueError("本项不能重新提交生成，当前动作：" + action)
             if not isinstance(event.get("handle"), str) or not event["handle"].strip():
