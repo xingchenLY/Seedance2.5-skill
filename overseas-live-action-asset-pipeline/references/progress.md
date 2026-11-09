@@ -24,6 +24,8 @@ request.region_mode 须先由用户选择，state 记录同一归一模式。未
 {"assets":[{"id":"匹配结果的ID","prompt":"完整的最终中文提示词","reference_ids":[],"reference_paths":[],"preflight":{"body_basis":"实际正文场次和证据行","continuity":"当前状态与应保持的不变量","framing":"本项比例、边界和留白安排","exclusions":"本项容易误入的物件或环境"}}]}
 ~~~
 
+人物 role_priority、outfit_role、design_only 从索引经 resolved_assets 自动传入 state，不仅写在 plan 里。主要常服与场合专用服的事实依据及美术补充区别写入 preflight；调整排序元数据后重新建索引并 init，不改变未修改图片的设计及通过状态。
+
 reference_ids 只能引用 resolved_assets 内资产，reference_paths 只用本次提供或明确指定的已有图绝对路径。三视图 parent_id 自动加入引用；换装／状态图引用基准照。助手拒绝额外项、重复 ID、未知引用和循环依赖。
 
 场景按 [空间区分与防重复](visual-specs.md#空间区分与防重复) 优先建立关联图片依赖：本次生成的关联空间用 `reference_ids`，用户提供且已确认适用的已有图用 `reference_paths`。从合格基准图向相邻空间延伸，后续空间可引用更直接关联的合格图；多个分支可共用一张基准图，无须全部串成单链。已选参考仍在生成或未通过检查时保留等待依赖，先推进其它独立项，不为凑并发跳过引用或构造互相等待。提交前实际查看源图，将 `next --include-prompt` 返回的可读引用路径传入图像工具；有主路径采用已归档图，无主路径采用已合格交付且可读的源图。参考选择、继承细节及延伸关系写入已有 `preflight.continuity`；换用其它适用参考时先更新计划及依据。仅提示词／表格模式不为建立图像参考额外启动生图。

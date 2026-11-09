@@ -141,6 +141,7 @@ def build_index(request, annotations, text_path=None):
     if not scenes:
         errors.append("索引缺少正文场次，不能依据人物小传建立资产")
     assets, ids, signatures = [], set(), set()
+    role_priorities, outfit_metadata, primary_outfits = {}, {}, {}
     for raw in annotations.get("assets", []):
         item = dict(raw)
         category, name, identifier = item.get("category"), item.get("name"), item.get("id")
@@ -164,6 +165,31 @@ def build_index(request, annotations, text_path=None):
             variant = {}
         if any(not isinstance(v, str) or not v.strip() for v in variant.values()):
             errors.append(f"资产 {identifier}：版本字段须有确定描述，未知时间应省略字段")
+        wardrobe = {}
+        if category == "人物":
+            priority = item.get("role_priority", 4 if kind == "group" else 3)
+            outfit_role = item.get("outfit_role", "other")
+            design_only = item.get("design_only", False)
+            if type(priority) is not int or priority not in (1, 2, 3, 4):
+                errors.append(f"资产 {identifier}：role_priority 须为 1 至 4 的整数")
+            if not isinstance(outfit_role, str) or outfit_role not in ("main_daily", "occasion", "other"):
+                errors.append(f"资产 {identifier}：outfit_role 须为 main_daily／occasion／other")
+            if type(design_only) is not bool or (design_only and outfit_role != "main_daily"):
+                errors.append(f"资产 {identifier}：design_only 须为布尔值，且仅主要常服可标记基础定装")
+            outfit = variant.get("outfit")
+            if outfit_role in ("main_daily", "occasion") and not outfit:
+                errors.append(f"资产 {identifier}：主要常服或场合服装须有明确 outfit 标签")
+            role_key = normalized(name)
+            if role_priorities.setdefault(role_key, priority) != priority:
+                errors.append(f"资产 {identifier}：同一角色的 role_priority 不一致")
+            # Invalid variant values are reported above, rather than used as dict keys.
+            if isinstance(outfit, str):
+                outfit_key = (role_key, outfit)
+                if outfit_metadata.setdefault(outfit_key, (outfit_role, design_only)) != (outfit_role, design_only):
+                    errors.append(f"资产 {identifier}：同套服装的用途或基础定装标记不一致")
+                if outfit_role == "main_daily" and primary_outfits.setdefault(role_key, outfit) != outfit:
+                    errors.append(f"资产 {identifier}：同一角色只能有一套主要常服，状态变化复用同一 outfit")
+            wardrobe = {"role_priority": priority, "outfit_role": outfit_role, "design_only": design_only}
         signature = object_hash([category, normalized(name), variant, kind])
         if signature in signatures:
             errors.append(f"资产 {identifier}：同一资产版本重复；请合并出现场次")
@@ -191,7 +217,8 @@ def build_index(request, annotations, text_path=None):
         if not occurrences:
             errors.append(f"资产 {identifier}：资产没有正文出场依据")
         assets.append({"id": identifier, "category": category, "name": name.strip(),
-                       "aliases": aliases, "variant": variant, "kind": kind, "occurrences": occurrences})
+                       "aliases": aliases, "variant": variant, "kind": kind, "occurrences": occurrences,
+                       **wardrobe})
         signatures.add(signature)
     if errors:
         raise IndexErrors(errors)

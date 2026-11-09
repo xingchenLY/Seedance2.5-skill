@@ -56,14 +56,25 @@ def group_scene_rows(rows, asset_ids):
 
 
 def group_character_items(items):
-    """Keep roles, base outfits and states together in first-appearance order."""
+    """Prioritize important roles and primary daily outfits; keep states together."""
     groups = {}
+    priorities, main_outfits = {}, {}
     for item in items:
         variant = item["variant"]
+        name, outfit = item["name"], variant.get("outfit")
+        priorities.setdefault(name, item.get("role_priority", 4 if item["kind"] == "group" else 3))
+        if item.get("outfit_role") == "main_daily":
+            main_outfits[name] = outfit
         states = groups.setdefault(item["name"], {}).setdefault(variant.get("outfit"), {})
         states.setdefault(variant.get("state"), []).append(item)
-    return [item for outfits in groups.values() for states in outfits.values()
-            for versions in states.values() for item in versions]
+    result = []
+    # Dict insertion order retains first appearance for equal importance and outfits.
+    for name in sorted(groups, key=lambda name: priorities[name]):
+        outfits = groups[name]
+        for outfit in sorted(outfits, key=lambda outfit: 0 if name in main_outfits and outfit == main_outfits[name] else 1):
+            for versions in outfits[outfit].values():
+                result.extend(versions)
+    return result
 
 
 def build_payload(state_path, asset_dir=None, previous_payload=None):
@@ -102,6 +113,9 @@ def build_payload(state_path, asset_dir=None, previous_payload=None):
                 outfit = "·".join(variant[k] for k in ("outfit", "state") if variant.get(k))
                 places = list(dict.fromkeys(scenes[s].get("location", s) for s in scene_ids))
                 row = [item["name"], outfit, "、".join(labels), "、".join(places), prompt]
+                if item.get("design_only"):
+                    # Occurrences document the character, not an invented on-screen outfit.
+                    row[2:4] = ["基础定装（美术设计）", ""]
             elif category == "场景":
                 row = [item["name"], variant.get("space"), variant.get("time"), "、".join(labels), prompt]
             else:
