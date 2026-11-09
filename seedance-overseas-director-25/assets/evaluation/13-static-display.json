@@ -1,0 +1,70 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [],
+  "action_tracks": [],
+  "segments": [
+    {
+      "id": "S1",
+      "shots": [
+        {
+          "start": 0,
+          "end": 1,
+          "frame_id": "分镜1",
+          "start_scale": "道具特写",
+          "end_scale": "道具特写",
+          "start_camera": "clock-A",
+          "end_camera": "clock-A",
+          "visible_characters": [],
+          "relation": {
+            "mode": "empty",
+            "characters": [],
+            "scene_characters": []
+          },
+          "view": {
+            "space": "走廊",
+            "position": "东墙电子钟正前方",
+            "direction": "墙上电子钟",
+            "height": "与钟面等高",
+            "subject": null,
+            "foreground": [],
+            "background": "电子钟周围墙面"
+          },
+          "camera_text": "正面固定，钟面完整清楚，没有反光遮挡。",
+          "visual_text": "画面仅见走廊墙上的电子钟与周围墙面，没有人物。",
+          "static_spans": [
+            {
+              "start": 0,
+              "end": 1,
+              "text": "电子钟固定显示“08:00”，不闪烁，无其他文字"
+            }
+          ]
+        }
+      ],
+      "episode": "current",
+      "speech": [],
+      "presentation": {
+        "整体风格": "真人写实，固定机位。",
+        "对话氛围": "无人物及对白。",
+        "场景": "走廊-早晨",
+        "环境光影": "窗光从画面左侧照向钟面。",
+        "人物位置关系": "无",
+        "特殊道具": "墙上电子钟。"
+      },
+      "pre_round_duration": 1.5
+    }
+  ],
+  "evaluation": {
+    "brief": "生成节选：空走廊墙上的电子钟显示08:00，以此交代时间，没有人物或发声。",
+    "manual_checks": [
+      "静态时间信息整镜1秒，落在1至2秒内，数字完整清楚且无中文。",
+      "没有为了动态化添加无关推镜、人物动作、发声或闪烁；静态起止与最终画面绑定。",
+      "本例整段估值1.5秒直接去小数为1秒，原声不缩短；无声动作或结果利落呈现，核对可见过程与信息可读性。"
+    ]
+  },
+  "mode": "真人剧"
+}

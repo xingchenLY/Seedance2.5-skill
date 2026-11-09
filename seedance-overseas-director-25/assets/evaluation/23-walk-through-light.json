@@ -1,0 +1,85 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "speech": [],
+      "presentation": {
+        "整体风格": "真人写实，固定机位，动作按正常速度。",
+        "对话氛围": "Mara 独自走向室内，没有对白。",
+        "场景": "大厅-白天",
+        "环境光影": "东窗日光在窗边形成亮区，室内西侧较暗，地面与人物轮廓仍可辨。",
+        "人物位置关系": "Mara 起初站在东窗旁，面向室内西侧，双手自然垂下。"
+      },
+      "shots": [
+        {
+          "start": 0,
+          "end": 3,
+          "frame_id": "分镜1",
+          "start_scale": "中景",
+          "end_scale": "中景",
+          "start_camera": "south-wall",
+          "end_camera": "south-wall",
+          "visible_characters": [
+            "Mara"
+          ],
+          "static_spans": [],
+          "relation": {
+            "mode": "solo",
+            "characters": [
+              "Mara"
+            ],
+            "scene_characters": [
+              "Mara"
+            ]
+          },
+          "camera_text": "摄影机位于大厅南侧墙边，镜头朝北固定，画幅覆盖窗边到室内两步距离。",
+          "visual_text": "Mara 位于画面右侧东窗亮区内，双手自然垂下。"
+        }
+      ],
+      "props": []
+    }
+  ],
+  "action_tracks": [
+    {
+      "id": "walk-west",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "原构思明确独自从东窗亮区向西走两步，在室内停住。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Mara.position": "东窗亮区，面朝西"
+          },
+          "after": {
+            "Mara.position": "室内西侧较暗处，面朝西"
+          },
+          "action_text": "Mara 面朝室内西侧，从画右向画左迈步，连续走两步离开东窗亮区；身体进入室内较暗处时受光逐渐减弱，随后双脚落稳停住，东窗位置不变。"
+        }
+      ],
+      "end_state": {
+        "Mara.position": "室内西侧较暗处，面朝西"
+      }
+    }
+  ],
+  "evaluation": {
+    "brief": "生成3秒无台词节选：Mara独处大厅，双手自然垂下，面朝西，从东窗亮区连续向西走两步，在室内较暗处停住。东窗与环境光固定，不增加其他动作。",
+    "manual_checks": [
+      "起步、两步路径和停住清楚，人物朝西与画面向左运动相容。",
+      "离开固定亮区才逐渐变暗，没有摄影灯追着人移动。",
+      "无新增声效、等待或额外镜头。"
+    ],
+    "rejected_example": "Mara进入室内暗区后，原东窗主光自动跟随她，亮区一起移动。",
+    "rejection_reason": "把固定窗光写成跟随灯，破坏场景照明和移动因果。"
+  },
+  "mode": "真人剧"
+}

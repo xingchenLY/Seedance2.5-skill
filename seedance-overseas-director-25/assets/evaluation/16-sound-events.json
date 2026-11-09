@@ -1,0 +1,214 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "You lied to me and I know why."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "shots": [
+        {
+          "start": 0,
+          "end": 2,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在画面右后方直视 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景，朝向 Mara"
+              }
+            ]
+          },
+          "view": {
+            "space": "大厅",
+            "position": "南端 Elias 右肩后",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [
+              "Elias"
+            ],
+            "background": "北窗"
+          },
+          "camera_text": "平视过肩固定。",
+          "visual_text": "Mara 面向 Elias 开口，口型对齐本人原词，Elias 肩背保持在前景。",
+          "static_spans": []
+        },
+        {
+          "start": 2,
+          "end": 4,
+          "frame_id": "分镜2",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "camera-1",
+          "end_camera": "camera-1",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "以肩背留在右前景，朝向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "位于画面左后方，身体朝向 Mara，视线按反应过程短暂避开再返回"
+              }
+            ]
+          },
+          "view": {
+            "space": "大厅",
+            "position": "北端 Mara 左肩后",
+            "direction": "Elias",
+            "height": "人物眼高",
+            "subject": "Elias",
+            "foreground": [
+              "Mara"
+            ],
+            "background": "南墙"
+          },
+          "camera_text": "在第2秒沿轴线同侧硬切反打机位，平视过肩固定。",
+          "visual_text": "Elias 在听到 Mara 指责自己说谎后，目光从稳定直视变为短暂避开，随后重新看向 Mara；他保持闭口，只做无声反应。",
+          "static_spans": []
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "start": 0.2,
+          "end": 3.8,
+          "estimated_seconds": 3.6,
+          "text": "You lied to me and I know why.",
+          "performance": "音量偏低，咬字清楚，重读 lied 和 why，句尾音量保持"
+        }
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "Mara 持续说话，Elias 闭口听着，听到指责后短暂避开目光再看回。",
+        "场景": "大厅-白天",
+        "环境光影": "右侧窗光。",
+        "人物位置关系": "Mara 与 Elias 在大厅窄桌两侧相对站立，视线连接双方。"
+      },
+      "sound_events": [
+        {
+          "id": "fan",
+          "kind": "continuous",
+          "source": "走廊通风机",
+          "text": "发出低鸣",
+          "start": 0.6,
+          "end": 3.2,
+          "basis_kind": "source_action",
+          "basis": "本例正文：通风机0.6秒启动、3.2秒停机。",
+          "sustain": "电机仍在运行",
+          "continues": false,
+          "end_reason": "电机停转，低鸣结束"
+        },
+        {
+          "id": "knock",
+          "kind": "instant",
+          "source": "门板",
+          "text": "传来一次敲击声",
+          "start": 2,
+          "end": 2,
+          "basis_kind": "source_action",
+          "basis": "本例正文：第2秒一次敲门。"
+        }
+      ],
+      "props": []
+    }
+  ],
+  "evaluation": {
+    "brief": "生成节选：Mara 与 Elias 在大厅窄桌两侧面对面。Mara 连续质问：You lied to me and I know why. Elias 听到自己被指责说谎后无声回避目光，又望回 Mara。不给反应额外停声时间，也没有第二位人物接话。 同期通风机在0.6秒启动、3.2秒停机，第2秒有人敲门一次。",
+    "manual_checks": [
+      "通风机只写0.6–2秒与2–3.2秒，跨镜保持同一声源；敲门只属于从2秒开始的后镜。",
+      "原句跨反应镜头不断声，不重复音效触发，不提前或复制已结束音效。"
+    ]
+  },
+  "action_tracks": [
+    {
+      "id": "Mara-lean",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "质问中的前倾与反应镜头肩背承接，不增加位移。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Mara.posture": "直立"
+          },
+          "after": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "action_text": "Mara 从直立姿态随质问小幅前倾，肩背渐紧，脚下位置不变。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 2,
+          "before": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "after": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "action_text": "Mara 在前景可见的肩背继续保持前倾后的状态，不重做前倾。"
+        }
+      ],
+      "end_state": {
+        "Mara.posture": "小幅前倾，肩背紧"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

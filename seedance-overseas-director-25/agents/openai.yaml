@@ -1,0 +1,4 @@
+interface:
+  display_name: "Seedance2.5导演"
+  short_description: "四模式视频导演，统筹整集情绪、完整表演与视听转折，统一素材和成稿校验"
+  default_prompt: "请使用 $seedance-overseas-director-25，沿用我已选的制作模式，未选时让我明确选择四种模式之一，再按剧本与范围统筹观看任务、完整表演和视听转折，完成导演分析或分镜提示词。"

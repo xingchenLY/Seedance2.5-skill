@@ -1,0 +1,220 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "You lied to me."
+    },
+    {
+      "id": "L2",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "Tell me why."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 4,
+      "english_words": 3,
+      "shots": [
+        {
+          "start": 0,
+          "end": 2,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在右后方桌北端面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景桌南端，与 Mara 隔桌相对"
+              }
+            ]
+          },
+          "camera_text": "平视固定，保持稳定。",
+          "visual_text": "Mara 看向 Elias 开口，口型对齐原句。",
+          "view": {
+            "space": "大厅",
+            "position": "长桌南端东侧，Elias 右肩后",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [
+              "Elias"
+            ],
+            "background": "Mara 身后的北窗"
+          },
+          "static_spans": []
+        },
+        {
+          "start": 2,
+          "end": 4,
+          "frame_id": "分镜2",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "camera-1",
+          "end_camera": "camera-1",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在右后方桌北端面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景桌南端，与 Mara 隔桌相对"
+              }
+            ]
+          },
+          "camera_text": "硬切到当前摄影位置，平视固定。",
+          "visual_text": "Mara 继续看向 Elias 质问，口型对齐原句。",
+          "view": {
+            "space": "大厅",
+            "position": "长桌东南角外侧，Elias 右后侧",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [
+              "Elias"
+            ],
+            "background": "北窗及西墙交界"
+          },
+          "static_spans": []
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "start": 0.2,
+          "end": 1.7,
+          "estimated_seconds": 1.5,
+          "text": "You lied to me.",
+          "performance": "音量偏低，咬字清楚，重读 lied，句尾不降低音量"
+        },
+        {
+          "source_id": "L2",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "text": "Tell me why.",
+          "start": 2.1,
+          "end": 3.7,
+          "estimated_seconds": 1.6,
+          "performance": "延续上一句音量与语速，咬字清楚，重读 why"
+        }
+      ],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "Mara 看着 Elias 连续说话，音量保持，重读 lied 和 why。",
+        "场景": "大厅-白天",
+        "环境光影": "右侧窗光。",
+        "人物位置关系": "Mara 与 Elias 面对面站立。"
+      },
+      "props": []
+    }
+  ],
+  "evaluation": {
+    "brief": "生成节选：Mara 已压着怒火面对 Elias，连续说 \"You lied to me.\"、\"Tell me why.\" 中间没有新的刺激。",
+    "manual_checks": [
+      "第二句承接余怒，可维持强度",
+      "不每句重新蓄力—爆发—平静",
+      "不为情绪过渡增加空等或反复推拉",
+      "按真实空间位置与主拍对象核对切点，前景人物不冒充主拍，不能仅换机位编号",
+      "首句自然倾身与台词同期，脚位、关系与原强度保持，不新增接触或剧情事件",
+      "后句接住身体姿态，不因换景别重做动作或强配新手势，不靠特写和加时丰富身体表达",
+      "按原文确认在场状态；同场镜头中主拍与可辨关系人物各有位置，反打不等于删除关系位；远距离与异地不硬塞同框",
+      "按原文核对 action_tracks 覆盖需要承接的姿态／手位／接触／持物变化，实际过渡落实于对应画面；空列表不能掩盖已有动作，快节奏不省略必要过程。",
+      "逐字段清理抽象评价、心理结论与比喻，段首和音色括号使用具体可见／可听内容；不新增剧情、改变原声文字或素材原名。"
+    ]
+  },
+  "action_tracks": [
+    {
+      "id": "Mara-lean",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "连续质问中的自然前倾，第二句保持前态，不重新发起。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Mara.posture": "直立，肩背紧绷"
+          },
+          "after": {
+            "Mara.posture": "略前倾，肩背紧绷"
+          },
+          "action_text": "Mara 从直立姿态随 lied 上身小幅前倾后停住，脚位不变，肩背仍紧；动作随原句完成。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 2,
+          "before": {
+            "Mara.posture": "略前倾，肩背紧绷"
+          },
+          "after": {
+            "Mara.posture": "略前倾，肩背紧绷"
+          },
+          "action_text": "Mara 承接上一镜略前倾的上身姿态，肩背仍绷紧，不重新前倾或退回直立。"
+        }
+      ],
+      "end_state": {
+        "Mara.posture": "略前倾，肩背紧绷"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

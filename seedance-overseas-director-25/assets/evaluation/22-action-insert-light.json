@@ -1,0 +1,237 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "Take the key. Keep it safe."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "Mara 看着 Elias 低声说话，Elias 闭口听着，交接按既有站位完成。",
+        "场景": "大厅-白天",
+        "环境光影": "北窗柔光照亮桌面与交接处，已有墙面反射光保留面部；各镜沿用同一北窗方向。",
+        "人物位置关系": "Mara 与 Elias 隔着窄桌相对，Mara 在桌左、Elias 在桌右；钥匙起初在 Mara 右手，Elias 左手空闲并位于身前桌沿。",
+        "特殊道具": "Mara 右手中的原文钥匙。"
+      },
+      "shots": [
+        {
+          "start": 0,
+          "end": 1,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "table-Mara",
+          "end_camera": "table-Mara",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在左后方桌边面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在右前景，与 Mara 隔窄桌相对"
+              }
+            ]
+          },
+          "camera_text": "桌侧平视固定，主拍 Mara，构图下沿包含腹前右手与桌沿。",
+          "visual_text": "Mara 看向 Elias 开口，口型与本人台词同步。",
+          "static_spans": []
+        },
+        {
+          "start": 1,
+          "end": 2.5,
+          "frame_id": "分镜1",
+          "start_scale": "手部特写",
+          "end_scale": "手部特写",
+          "start_camera": "table-hands",
+          "end_camera": "table-hands",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "insert",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ]
+          },
+          "camera_text": "沿动作硬切桌沿侧上方固定机位，取景集中在 Mara 右手、钥匙、Elias 左手和两人之间的桌沿，面部不入画。",
+          "visual_text": "Mara 与 Elias 仍在原桌边位置，局部画面清楚交代双方手部归属。钥匙表面有小块镜面高光，双方指尖接触与松开位置清楚可见。",
+          "static_spans": []
+        },
+        {
+          "start": 2.5,
+          "end": 4,
+          "frame_id": "分镜1",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "table-Elias",
+          "end_camera": "table-Elias",
+          "visible_characters": [
+            "Elias",
+            "Mara"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Elias",
+              "Mara"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "在右后方桌边面向 Mara"
+              },
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景，保持与 Elias 隔窄桌相对"
+              }
+            ]
+          },
+          "camera_text": "硬切同轴线一侧的反打机位，平视固定，主拍 Elias，前景保留 Mara 的肩背。",
+          "visual_text": "Elias 听着 Mara 余下的 Keep it safe，目光仍落向 Mara，嘴部闭合；交接已完成，不重演伸手或另添动作。",
+          "static_spans": [
+            {
+              "start": 2.5,
+              "end": 4,
+              "text": "Elias 保持闭口看向 Mara，交接后的姿态不变，前景 Mara 肩背保持原位置"
+            }
+          ]
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "start": 0.1,
+          "end": 3.6,
+          "estimated_seconds": 3.5,
+          "text": "Take the key. Keep it safe.",
+          "performance": "音量偏低，语速均匀，safe 略加重；切到手部和听者时原台词声继续，音量和语速接前文"
+        }
+      ],
+      "sound_events": [
+        {
+          "id": "key-touch",
+          "kind": "instant",
+          "source": "交接处的钥匙",
+          "text": "发出一次细微接触声",
+          "start": 1.7,
+          "end": 1.7,
+          "basis_kind": "source_action",
+          "basis": "原文钥匙交接，接稳时触发一次。"
+        },
+        {
+          "id": "hall-ambient",
+          "kind": "continuous",
+          "source": "大厅",
+          "text": "环境底噪低响",
+          "start": 0,
+          "end": 4,
+          "basis_kind": "scene",
+          "basis": "既有室内环境。",
+          "sustain": "现场环境未改变",
+          "continues": true,
+          "end_reason": "镜末声源未停止"
+        }
+      ]
+    }
+  ],
+  "evaluation": {
+    "brief": "生成节选：大厅窄桌两侧 Mara 与 Elias 相对。Mara 右手在腹前握着钥匙，Elias 左手空闲放在桌沿。Mara 边说 \"Take the key. Keep it safe.\" 边向 Elias 递出钥匙；Elias 用左手接稳，Mara 松手。Elias 认真听完，没有回应。本段的剧情重点是关键钥匙从 Mara 转交 Elias，特写只突出归属改变，其他普通动作不另加特写。 大厅北窗柔光照亮桌面，浅色墙面有弱反射；动作特写承接同一光源，不新增道具聚光。",
+    "manual_checks": [
+      "手部特写承接同一北窗，镜面高光不遮住接稳和松手结果。",
+      "特写仍对应关键钥匙归属变化，原句连续，动作状态链不重做。"
+    ],
+    "rejected_example": "切到手部后，钥匙被一束来源不明的红色聚光照亮，指尖完全过曝。",
+    "rejection_reason": "插镜改变原光源且遮住关键交接。"
+  },
+  "action_tracks": [
+    {
+      "id": "key-handoff",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "原文递钥匙：Mara右手发起，Elias左手接稳后Mara才松开，归属改变需可见。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "key.owner": "Mara右手",
+            "Mara.right_hand": "腹前握钥匙",
+            "Elias.left_hand": "空手在桌沿"
+          },
+          "after": {
+            "key.owner": "Mara右手",
+            "Mara.right_hand": "向桌对面伸出途中握钥匙",
+            "Elias.left_hand": "空手在桌沿"
+          },
+          "action_text": "Mara 右手从腹前握钥匙的状态随 Take 将前臂向桌对面伸出，切出时手仍在伸出途中，钥匙尚由本人握持。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 1,
+          "before": {
+            "key.owner": "Mara右手",
+            "Mara.right_hand": "向桌对面伸出途中握钥匙",
+            "Elias.left_hand": "空手在桌沿"
+          },
+          "after": {
+            "key.owner": "Elias左手",
+            "Mara.right_hand": "交接点松开钥匙",
+            "Elias.left_hand": "已接稳钥匙"
+          },
+          "action_text": "承接 Mara 右手已伸出的同一进度，右手从画左继续递向桌对面；Elias 左手由画右桌沿抬起，在第1.7秒接稳钥匙，Mara 随即松开右手，钥匙转由 Elias 左手握持，接稳与放手结果依次可辨。"
+        }
+      ],
+      "end_state": {
+        "key.owner": "Elias左手",
+        "Mara.right_hand": "交接点松开钥匙",
+        "Elias.left_hand": "已接稳钥匙"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

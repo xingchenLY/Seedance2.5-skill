@@ -1,0 +1,180 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 6,
+      "english_words": 0,
+      "shots": [
+        {
+          "start": 0,
+          "end": 2,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "flash-0",
+          "end_camera": "flash-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在右后方桌北端面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景桌南端，与 Mara 隔桌相对"
+              }
+            ]
+          },
+          "camera_text": "平视过肩固定，清楚保留双方位置。",
+          "visual_text": "当前大厅，Mara 望见 Elias 手边旧杯，目光短暂凝住。",
+          "static_spans": []
+        },
+        {
+          "start": 2,
+          "end": 4,
+          "frame_id": "分镜2",
+          "start_scale": "动作特写",
+          "end_scale": "动作特写",
+          "start_camera": "flash-1",
+          "end_camera": "flash-1",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "insert",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ]
+          },
+          "camera_text": "第2秒起用短叠化将当前大厅画面过渡为过去同一大厅的桌边画面，在本镜原区间内于第2.2秒完成，再承接递杯动作；桌侧低斜角固定，主体为 Elias 右手、旧杯和 Mara 左手，保留桌沿方向，不含两人面部。",
+          "visual_text": "过去同一大厅桌边，取景保留 Elias 右手、Mara 左手及两人之间的桌沿，面部不入画。",
+          "static_spans": []
+        },
+        {
+          "start": 4,
+          "end": 6,
+          "frame_id": "分镜3",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "flash-2",
+          "end_camera": "flash-2",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在右后方桌北端面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景桌南端，与 Mara 隔桌相对"
+              }
+            ]
+          },
+          "camera_text": "平视过肩固定，清楚保留双方位置。",
+          "visual_text": "返回当前大厅，Mara 的目光从原位置的旧杯抬向 Elias；承接现实未完成的凝视。",
+          "static_spans": []
+        }
+      ],
+      "speech": [],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "本段无对白；现实中 Mara 看向旧杯，再将视线抬向 Elias。",
+        "场景": "大厅-白天",
+        "环境光影": "现实右侧窗光；回忆按过去白天窗光；返回恢复现实。",
+        "人物位置关系": "现实 Mara 与 Elias 隔桌相对；回忆中两人于桌边交接旧杯，分别承接对应时点。",
+        "特殊道具": "原文已有旧杯。"
+      }
+    }
+  ],
+  "evaluation": {
+    "brief": "生成无台词节选：Mara 见到 Elias 手边旧杯，短回忆 Elias 当初把杯子递给她，随后回到当前对峙。旧杯交接是本次回忆要强调的关系线索，特写突出递接这一完整节点，不给每个步骤各切一镜。",
+    "manual_checks": [
+      "短回忆同段按现实—回忆—现实顺序",
+      "交接动作有起始和结果",
+      "回忆与现实道具、位置不混用",
+      "回忆的递杯、接稳、松手共用动作特写，逐项发生且可辨",
+      "特写呈现两人手部及桌沿，不为关系位强塞肩背或补拍面部",
+      "核对特写的具体剧情作用与前后画面承接，不能只因动作被写进原文就加特写",
+      "按原文确认在场状态；同场镜头中主拍与可辨关系人物各有位置，反打不等于删除关系位；远距离与异地不硬塞同框",
+      "按原文核对 action_tracks 覆盖需要承接的姿态／手位／接触／持物变化，实际过渡落实于对应画面；空列表不能掩盖已有动作，快节奏不省略必要过程。",
+      "逐字段清理抽象评价、心理结论与比喻，段首和音色括号使用具体可见／可听内容；不新增剧情、改变原声文字或素材原名。",
+      "回忆未拆段，在第2秒实际入口有短叠化，原镜内完成，不另加声音或秒数，关键交接在效果结束后清楚可见。"
+    ]
+  },
+  "action_tracks": [
+    {
+      "id": "past-cup-handoff",
+      "episode": "current",
+      "time_layer": "past-hall",
+      "basis": "回忆原文 Elias 把旧杯递给 Mara，须呈现接稳与松手。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 2,
+          "before": {
+            "cup.owner": "Elias右手",
+            "Mara.left_hand": "空手在桌沿"
+          },
+          "after": {
+            "cup.owner": "Mara左手",
+            "Mara.left_hand": "握稳杯身"
+          },
+          "action_text": "过去同一大厅桌边，Elias 的右手在画右握杯，Mara 的左手在画左桌沿；Elias 向画左递杯，Mara 左手由桌沿抬起接稳杯身，Elias 右手随即松开，杯子转由 Mara 握持，整个接触与易主过程清楚。"
+        }
+      ],
+      "end_state": {
+        "cup.owner": "Mara左手",
+        "Mara.left_hand": "握稳杯身"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

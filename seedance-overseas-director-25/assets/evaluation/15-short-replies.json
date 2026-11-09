@@ -1,0 +1,188 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "Wait."
+    },
+    {
+      "id": "L2",
+      "episode": "current",
+      "speaker": "Elias",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "No."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "shots": [
+        {
+          "start": 0.0,
+          "end": 0.5,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在画面右后方直视 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景，朝向 Mara"
+              }
+            ]
+          },
+          "view": {
+            "space": "大厅",
+            "position": "南端 Elias 右肩后",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [
+              "Elias"
+            ],
+            "background": "北窗"
+          },
+          "camera_text": "平视过肩固定。",
+          "visual_text": "Mara面向对方开口说出原句，口型同步，另一人保持闭口；双方原站位不变。",
+          "static_spans": [],
+          "short_shot": {
+            "reason": "rapid_reply",
+            "basis": "原文两人紧接的单词短答，发声各约0.5秒，切镜不加停顿。",
+            "readability": "空间与对象已建立，固定机位仅承载一个短词及清楚口型。"
+          }
+        },
+        {
+          "start": 0.5,
+          "end": 1.0,
+          "frame_id": "分镜2",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "camera-1",
+          "end_camera": "camera-1",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "以肩背留在右前景，朝向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "位于画面左后方，身体与视线朝向 Mara"
+              }
+            ]
+          },
+          "view": {
+            "space": "大厅",
+            "position": "北端 Mara 左肩后",
+            "direction": "Elias",
+            "height": "人物眼高",
+            "subject": "Elias",
+            "foreground": [
+              "Mara"
+            ],
+            "background": "南墙"
+          },
+          "camera_text": "沿轴线同侧硬切反打，平视过肩固定。",
+          "visual_text": "Elias面向对方开口说出原句，口型同步，另一人保持闭口；双方原站位不变。",
+          "static_spans": [],
+          "short_shot": {
+            "reason": "rapid_reply",
+            "basis": "原文两人紧接的单词短答，发声各约0.5秒，切镜不加停顿。",
+            "readability": "空间与对象已建立，固定机位仅承载一个短词及清楚口型。"
+          }
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "start": 0.0,
+          "end": 0.5,
+          "estimated_seconds": 0.5,
+          "text": "Wait.",
+          "performance": "短句清楚直接说出，不加停顿"
+        },
+        {
+          "source_id": "L2",
+          "speaker": "Elias",
+          "kind": "dialogue",
+          "start": 0.5,
+          "end": 1.0,
+          "estimated_seconds": 0.5,
+          "text": "No.",
+          "performance": "短句清楚直接说出，不加停顿"
+        }
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "两人隔桌相对，短句连续接话。",
+        "场景": "大厅-白天",
+        "环境光影": "右侧窗光。",
+        "人物位置关系": "Mara 与 Elias 在大厅窄桌两侧相对站立，视线连接双方。"
+      },
+      "pre_round_duration": 1,
+      "timing_feasibility": {
+        "minimum_seconds": 1,
+        "basis": "两条短声依次各0.5秒，无额外动作占时。"
+      },
+      "props": []
+    }
+  ],
+  "evaluation": {
+    "brief": "节选：已建立的隔桌对话中，Mara说“Wait.”，Elias立即回答“No.”；两句各约0.5秒。不添加动作、空等或停顿。",
+    "manual_checks": [
+      "两个各0.5秒的固定反打分别只有一位发声者；短镜例外仅放宽镜头时长。",
+      "原台词、口型、关系位和合法切点保留，总时长1秒。"
+    ]
+  },
+  "action_tracks": [],
+  "mode": "真人剧"
+}

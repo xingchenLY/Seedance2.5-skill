@@ -1,0 +1,113 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 1,
+      "english_words": 0,
+      "shots": [
+        {
+          "start": 0,
+          "end": 1,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在右后方桌北端面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景桌南端，与 Mara 隔桌相对"
+              }
+            ]
+          },
+          "camera_text": "桌侧斜前方固定，主拍 Mara，构图下沿保留右手、近处杯子和桌沿，不另切局部。",
+          "visual_text": "Mara 与 Elias 仍分处窄桌两侧，原位置和朝向保持。",
+          "static_spans": []
+        }
+      ],
+      "speech": [],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "本段无对白，Mara 与 Elias 保持隔桌相对。",
+        "场景": "大厅-白天",
+        "环境光影": "右侧窗光。",
+        "人物位置关系": "Mara 与 Elias 在桌两侧相对，Mara 右手起初在桌沿，杯子在其手前近处。",
+        "特殊道具": "桌上已有杯子。"
+      },
+      "pre_round_duration": 1.5
+    }
+  ],
+  "evaluation": {
+    "brief": "生成无台词节选：Mara 与 Elias 隔桌相对，Mara 右手从桌沿取起近处已有杯子。无伤势、无迟疑。杯子没有关键线索或独立剧情作用，只是普通取物行为。",
+    "manual_checks": [
+      "普通取杯保留中近景完整呈现，不因原文明确写出就给手部特写",
+      "起手、接触、提起在同一镜头连贯可见，不跳到已持杯状态",
+      "全镜1秒，不拆步骤、不添等待、喝水或其他后续动作",
+      "手与杯子在真实取景范围内，人物关系和空间保持清楚",
+      "按原文确认在场状态；同场镜头中主拍与可辨关系人物各有位置，反打不等于删除关系位；远距离与异地不硬塞同框",
+      "按原文核对 action_tracks 覆盖需要承接的姿态／手位／接触／持物变化，实际过渡落实于对应画面；空列表不能掩盖已有动作，快节奏不省略必要过程。",
+      "逐字段清理抽象评价、心理结论与比喻，段首和音色括号使用具体可见／可听内容；不新增剧情、改变原声文字或素材原名。",
+      "本例整段估值1.5秒直接去小数为1秒，原声不缩短；无声动作或结果利落呈现，核对可见过程与信息可读性。"
+    ]
+  },
+  "action_tracks": [
+    {
+      "id": "cup-pickup",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "原文普通取杯，右手由桌沿取近处杯子，不加特写。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Mara.right_hand": "空手停在桌沿",
+            "cup.owner": "桌面上"
+          },
+          "after": {
+            "Mara.right_hand": "握稳杯身提离桌面",
+            "cup.owner": "Mara右手"
+          },
+          "action_text": "Mara 右手从桌沿抬起，伸向近处杯身握稳并直接提离桌面，起手、接触与结果在同一画面内连贯可见，双方位置不变。"
+        }
+      ],
+      "end_state": {
+        "Mara.right_hand": "握稳杯身提离桌面",
+        "cup.owner": "Mara右手"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

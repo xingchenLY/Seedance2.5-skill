@@ -1,0 +1,163 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 3,
+      "english_words": 0,
+      "shots": [
+        {
+          "start": 0.0,
+          "end": 1.5,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "desk-fixed",
+          "end_camera": "desk-fixed",
+          "visible_characters": [
+            "Mara"
+          ],
+          "view": {
+            "space": "资料室",
+            "position": "桌南侧斜前方",
+            "direction": "桌北侧的 Mara",
+            "height": "Mara 坐姿眼高",
+            "subject": "Mara",
+            "foreground": [],
+            "background": "Mara 身后的北墙"
+          },
+          "relation": {
+            "mode": "solo",
+            "characters": [
+              "Mara"
+            ],
+            "scene_characters": [
+              "Mara"
+            ]
+          },
+          "camera_text": "平视固定，下沿容纳名单与双手。",
+          "visual_text": "Mara 独自坐在资料室桌北侧，视线沿身前页面向下移动，嘴部闭合。",
+          "static_spans": []
+        },
+        {
+          "start": 1.5,
+          "end": 3.0,
+          "frame_id": "分镜2",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "desk-fixed",
+          "end_camera": "desk-fixed",
+          "visible_characters": [
+            "Mara"
+          ],
+          "view": {
+            "space": "资料室",
+            "position": "桌南侧斜前方",
+            "direction": "桌北侧的 Mara",
+            "height": "Mara 坐姿眼高",
+            "subject": "Mara",
+            "foreground": [],
+            "background": "Mara 身后的北墙"
+          },
+          "relation": {
+            "mode": "solo",
+            "characters": [
+              "Mara"
+            ],
+            "scene_characters": [
+              "Mara"
+            ]
+          },
+          "camera_text": "平视固定，下沿容纳名单与双手。",
+          "visual_text": "Mara 独自坐在资料室桌北侧，视线沿身前页面向下移动，嘴部闭合。",
+          "jump_cut_before": {
+            "from_shot_start": 0,
+            "basis": "案例原文明确从核对第一页跳至稍后核对末页，中间为可省略的重复阅读与翻页。",
+            "omitted": "中间各页的重复阅读与翻页过程",
+            "cue": "保持同一摄影位置和取景，画面直接进入稍后的阅读时点"
+          },
+          "static_spans": []
+        }
+      ],
+      "speech": [],
+      "cast": [
+        "Mara"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，固定机位，人物按正常速度行动。",
+        "对话氛围": "本段无对白，Mara 低头查看名单。",
+        "场景": "资料室-白天",
+        "环境光影": "右侧窗光照向桌面。",
+        "人物位置关系": "Mara 坐在桌北侧，名单摊放在身前，双手保持在纸张两侧。",
+        "特殊道具": "桌上已有名单。"
+      }
+    }
+  ],
+  "action_tracks": [
+    {
+      "id": "reading",
+      "episode": "current",
+      "time_layer": "present-room",
+      "basis": "原文反复逐页核对，明确从第一页跳至稍后末页。",
+      "end_state": {
+        "list.page": "末页",
+        "Mara.left_hand": "按住名单左侧",
+        "Mara.right_hand": "停在当前页下缘"
+      },
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "list.page": "第一页",
+            "Mara.left_hand": "按住名单左侧",
+            "Mara.right_hand": "停在当前页下缘"
+          },
+          "after": {
+            "list.page": "第一页",
+            "Mara.left_hand": "按住名单左侧",
+            "Mara.right_hand": "停在当前页下缘"
+          },
+          "action_text": "Mara 左手按住名单左侧，右手停在第一页下缘，保持坐姿阅读。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 1.5,
+          "before": {
+            "list.page": "末页",
+            "Mara.left_hand": "按住名单左侧",
+            "Mara.right_hand": "停在当前页下缘"
+          },
+          "after": {
+            "list.page": "末页",
+            "Mara.left_hand": "按住名单左侧",
+            "Mara.right_hand": "停在当前页下缘"
+          },
+          "break_before": {
+            "kind": "source_time_jump",
+            "basis": "案例原文明确稍后核对末页，省略中间重复翻页过程。",
+            "resume_text": "稍后，名单已翻至末页，Mara 仍坐在原位，左手按住名单左侧，右手停在末页下缘。"
+          },
+          "action_text": "Mara 继续阅读末页，双手保持当前位置。"
+        }
+      ]
+    }
+  ],
+  "evaluation": {
+    "brief": "无台词节选：Mara 独自在资料室坐着核对名单。先查看第一页，经过一段重复阅读和翻页，稍后查看末页。中间过程可省略，各页没有需要展示的具体线索或文字；保留第一页和末页两个时点，以同机位跳切压缩过程。",
+    "manual_checks": [
+      "跳切有原文时间省略依据，普通换机位不冒充跳时",
+      "同机位、同景别如实记录，例外只绑定前一个实际切点",
+      "双手与纸张状态按 source_time_jump 承接，不能仅靠跳切标记跳过动作状态校验",
+      "不新增原声、重要线索、动作或虚构页码，成片3秒不含被省略的故事时间"
+    ]
+  },
+  "mode": "真人剧"
+}

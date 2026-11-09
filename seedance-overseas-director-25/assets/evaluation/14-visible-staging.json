@@ -1,0 +1,186 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "林晚",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "What?"
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "shots": [
+        {
+          "start": 0,
+          "end": 2,
+          "frame_id": "分镜1",
+          "start_scale": "全景",
+          "end_scale": "全景",
+          "start_camera": "corridor-0",
+          "end_camera": "corridor-0",
+          "visible_characters": [
+            "林晚"
+          ],
+          "static_spans": [],
+          "relation": {
+            "mode": "solo",
+            "characters": [
+              "林晚"
+            ],
+            "scene_characters": [
+              "林晚"
+            ]
+          },
+          "view": {
+            "space": "走廊",
+            "position": "南侧墙边",
+            "direction": "北侧走廊中的林晚",
+            "height": "林晚眼高",
+            "subject": "林晚",
+            "foreground": [],
+            "background": "北墙"
+          },
+          "camera_text": "侧面固定，下沿保留脚下两步的移动；画右对应走廊东端门边。",
+          "visual_text": "林晚独自在走廊，身体面向画右的东端门边，右手在胸前持手机，屏幕朝向自己，嘴部闭合。"
+        },
+        {
+          "start": 2,
+          "end": 4,
+          "frame_id": "分镜2",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "corridor-1",
+          "end_camera": "corridor-1",
+          "visible_characters": [
+            "林晚"
+          ],
+          "static_spans": [],
+          "relation": {
+            "mode": "solo",
+            "characters": [
+              "林晚"
+            ],
+            "scene_characters": [
+              "林晚"
+            ]
+          },
+          "view": {
+            "space": "走廊",
+            "position": "东端门旁正前方",
+            "direction": "西侧门边的林晚",
+            "height": "林晚眼高",
+            "subject": "林晚",
+            "foreground": [],
+            "background": "西侧走廊"
+          },
+          "camera_text": "正面固定，取景包含面部与胸前手机；手机背板朝向摄影机，屏幕朝向林晚。",
+          "visual_text": "林晚独自停在东端门边，保持面朝东端门的站姿，低头看手中手机；看过之后双眼睁大，嘴部保持闭合，右手与手机位置不变。"
+        },
+        {
+          "start": 4,
+          "end": 5,
+          "frame_id": "分镜3",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "corridor-2",
+          "end_camera": "corridor-2",
+          "visible_characters": [
+            "林晚"
+          ],
+          "static_spans": [],
+          "relation": {
+            "mode": "solo",
+            "characters": [
+              "林晚"
+            ],
+            "scene_characters": [
+              "林晚"
+            ]
+          },
+          "view": {
+            "space": "走廊",
+            "position": "东端门旁偏北的斜前方",
+            "direction": "西南侧门边的林晚",
+            "height": "林晚眼高",
+            "subject": "林晚",
+            "foreground": [],
+            "background": "西南侧墙面"
+          },
+          "camera_text": "硬切斜前方实际机位，固定，近景保留完整面部和下方手机背板；屏幕仍朝向林晚。",
+          "visual_text": "林晚仍独自站在东端门边，承接刚才睁大双眼的状态，身体仍面朝东端门，不随换机位转向；第4.1秒开口说出本人原句，嘴部清楚可见，口型与本人声音同步，句尾闭口，右手保持胸前持机。"
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "林晚",
+          "kind": "dialogue",
+          "start": 4.1,
+          "end": 4.6,
+          "estimated_seconds": 0.5,
+          "text": "What?",
+          "performance": "音量略高，原词清楚，短句直接说出"
+        }
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜摄影机固定，人物自然行动。",
+        "对话氛围": "林晚独自看手机，随后说出短句。",
+        "场景": "走廊-白天",
+        "环境光影": "北侧窗光照向走廊。",
+        "人物位置关系": "林晚独自在走廊，由中部走到东端门边并停住，随后保持原位。",
+        "特殊道具": "林晚右手中的手机。"
+      }
+    }
+  ],
+  "action_tracks": [
+    {
+      "id": "walk-east",
+      "episode": "current",
+      "time_layer": "present-corridor",
+      "basis": "示例正文要求林晚向东端门边走两步后停住，再看手机；仅写取景实际可见的方向和过程。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "林晚.position": "走廊中部",
+            "林晚.facing": "东端门",
+            "林晚.phone": "右手胸前持机，屏幕朝自己"
+          },
+          "after": {
+            "林晚.position": "东端门边",
+            "林晚.facing": "东端门",
+            "林晚.phone": "右手胸前持机，屏幕朝自己"
+          },
+          "action_text": "林晚身体保持面向走廊东端门，从画左向画右迈出两步，在门边收住脚步停稳；手机随右手保持胸前，不换手。"
+        }
+      ],
+      "end_state": {
+        "林晚.position": "东端门边",
+        "林晚.facing": "东端门",
+        "林晚.phone": "右手胸前持机，屏幕朝自己"
+      }
+    }
+  ],
+  "evaluation": {
+    "brief": "节选：林晚独自在走廊，右手在胸前拿着手机，朝东端门边走两步并停住，随后低头看手机，双眼睁大，开口说“What?”。只拍人物及手机背面，不展示手机内容；无其他发声或吸气声。",
+    "manual_checks": [
+      "第一镜写身体朝东、画面由左向右移动到门边，摄影机固定且方向独立明确；反打后保持真实站位。",
+      "正面看手机时背板朝镜头，不描写屏幕文字、照片或不可见内容，不擅自增加屏幕特写。",
+      "嘴部可见的现场短句明确开口、口型同步、句尾闭口；原句只登记一次，中文名保留。",
+      "惊讶只写本镜可见反应，没有无依据的吸气／惊叫，也不拿呼吸声填音效字段。",
+      "总时长5秒等于末镜结束，三镜各为2秒、2秒、1秒，不为转场或反应加时。"
+    ]
+  },
+  "mode": "真人剧"
+}

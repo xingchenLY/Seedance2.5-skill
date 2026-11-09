@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "default_style_id": "zootopia",
+  "generic": {
+    "id": "generic-3d",
+    "label": "通用3D",
+    "aliases": [
+      "通用3D（不套标签）",
+      "通用3D动画",
+      "不套风格",
+      "generic-3d"
+    ]
+  },
+  "styles": [
+    {
+      "id": "zootopia",
+      "label": "风格化都市3D",
+      "aliases": [
+        "疯狂动物城",
+        "#疯狂动物城",
+        "疯狂动物城风格",
+        "Zootopia",
+        "Zootropolis"
+      ],
+      "profile": "zootopia.md",
+      "revision": "2026-11-04",
+      "summary": "清楚的形体与表演；已有动物的耳尾优先参与情绪表达，结合可信材质、多尺度空间与剧情光色",
+      "character_modes": [
+        "保留原物种",
+        "用户明确的拟人动物映射"
+      ]
+    }
+  ]
+}

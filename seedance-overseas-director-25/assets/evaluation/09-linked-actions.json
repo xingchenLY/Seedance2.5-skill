@@ -1,0 +1,114 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 1,
+      "english_words": 0,
+      "shots": [
+        {
+          "start": 0,
+          "end": 1,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "位于左后方桌边，起初朝向桌面，放杯后转向右侧的 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以侧脸留在右前景，面对 Mara，仍在原桌侧"
+              }
+            ]
+          },
+          "camera_text": "桌侧斜前方固定，主拍 Mara，构图下沿保留右手、近处杯子和桌沿，不另切局部。",
+          "visual_text": "Mara 与 Elias 保持窄桌两侧原站位，构图同时看清 Mara 右手、桌面落杯点与上身转向。",
+          "static_spans": []
+        }
+      ],
+      "speech": [],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "本段无对白，Mara 与 Elias 保持窄桌两侧原站位。",
+        "场景": "大厅-白天",
+        "环境光影": "右侧窗光。",
+        "人物位置关系": "Mara 在窄桌左侧，Elias 在右侧；Mara 起初朝向桌面，右手在桌面上方握杯，Elias 位于她的右侧。",
+        "特殊道具": "Mara 右手中的普通杯子。"
+      },
+      "pre_round_duration": 1.8
+    }
+  ],
+  "evaluation": {
+    "brief": "生成无台词节选：Mara 在窄桌左侧，Elias 在右侧。Mara 起初面朝桌面，右手持普通杯子位于桌面上方；她将杯子放回近处桌面，然后转身面向右侧的 Elias。杯子无关键线索，不加动作特写。",
+    "manual_checks": [
+      "放杯与转身之间有落稳、松手、收手承接；不能手还握杯就直接跳到空手转身",
+      "同镜共1秒，动作自然利落，无准备镜头或逐步停顿，不为普通放杯增加特写",
+      "前后持物、手位与朝向有对应状态，实际动作句写入画面内容",
+      "按取景核对手部与上身过程可见，原人物距离不变，未新增剧情",
+      "逐字段清理抽象评价、心理结论与比喻，段首和音色括号使用具体可见／可听内容；不新增剧情、改变原声文字或素材原名。",
+      "本例整段估值1.8秒直接去小数为1秒，原声不缩短；无声动作或结果利落呈现，核对可见过程与信息可读性。"
+    ]
+  },
+  "action_tracks": [
+    {
+      "id": "put-cup-then-turn",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "原文先放下杯子再转身面向 Elias，必要衔接是杯底落稳、手松开收回，然后转肩。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "cup.owner": "Mara右手",
+            "Mara.right_hand": "在桌面上方握杯",
+            "Mara.facing": "桌面"
+          },
+          "after": {
+            "cup.owner": "桌面上",
+            "Mara.right_hand": "松杯后收回身前",
+            "Mara.facing": "Elias"
+          },
+          "action_text": "Mara 承接右手持杯状态，将杯底落稳在近处桌面，松开杯身并收回右手，随即转肩带动上身转向右侧的 Elias；两个动作利落相接，脚下位置不变。"
+        }
+      ],
+      "end_state": {
+        "cup.owner": "桌面上",
+        "Mara.right_hand": "松杯后收回身前",
+        "Mara.facing": "Elias"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

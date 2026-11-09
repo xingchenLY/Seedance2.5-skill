@@ -1,0 +1,324 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "You lied to me about the money. I checked the account this morning, and every payment went straight to you.",
+      "reaction_targets": [
+        "Elias"
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "shots": [
+        {
+          "start": 0,
+          "end": 3,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在画面右后方直视 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景，朝向 Mara"
+              }
+            ]
+          },
+          "view": {
+            "space": "大厅",
+            "position": "南端 Elias 右肩后",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [
+              "Elias"
+            ],
+            "background": "北窗"
+          },
+          "camera_text": "平视过肩固定。",
+          "visual_text": "Mara 面向 Elias 开口，口型对齐本人原词，Elias 肩背保持在前景。",
+          "static_spans": []
+        },
+        {
+          "start": 3,
+          "end": 5,
+          "frame_id": "分镜1",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "camera-1",
+          "end_camera": "camera-1",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "以肩背留在右前景，朝向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "位于画面左后方，身体朝向 Mara"
+              }
+            ]
+          },
+          "view": {
+            "space": "大厅",
+            "position": "北端 Mara 左肩后",
+            "direction": "Elias",
+            "height": "人物眼高",
+            "subject": "Elias",
+            "foreground": [
+              "Mara"
+            ],
+            "background": "南墙"
+          },
+          "camera_text": "在第3秒沿轴线同侧硬切反打机位，平视过肩固定，近景下沿保留 Elias 肩背。",
+          "visual_text": "Elias 正脸与眉眼清楚可见。",
+          "static_spans": []
+        },
+        {
+          "start": 5,
+          "end": 8,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在画面右后方直视 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景，朝向 Mara"
+              }
+            ]
+          },
+          "view": {
+            "space": "大厅",
+            "position": "南端 Elias 右肩后",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [
+              "Elias"
+            ],
+            "background": "北窗"
+          },
+          "camera_text": "在第5秒硬切回原轴线同侧的实际摄影位置，平视过肩固定。",
+          "visual_text": "Mara 承接尚未说完的原句继续开口讲话，口型同步，Elias 肩背保持在前景。",
+          "static_spans": []
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "start": 0.2,
+          "end": 7.8,
+          "estimated_seconds": 7.6,
+          "text": "You lied to me about the money. I checked the account this morning, and every payment went straight to you.",
+          "performance": "延续起句音量，咬字清楚，在 money 和 you 加重原词，语速保持自然，句间只留自然气口",
+          "dialogue_review": {
+            "mode": "covered",
+            "listeners": [
+              "Elias"
+            ],
+            "basis": "合成源文指定 Elias 听清钱款指责后避开目光又望回；两人在场能听见。",
+            "reactions": [
+              {
+                "listener": "Elias",
+                "trigger": {
+                  "segment_id": "S1",
+                  "speech_index": 0,
+                  "quote": "You lied to me about the money.",
+                  "heard_at": 3
+                },
+                "segment_id": "S1",
+                "shot_start": 3,
+                "start": 3,
+                "end": 5,
+                "channel": "face",
+                "visibility_evidence": "Elias 正脸与眉眼清楚可见",
+                "evidence": "Elias 已听清关于钱款的指责，目光短暂避开后重新看向 Mara；他保持闭口"
+              }
+            ]
+          }
+        }
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "Mara 连续说原话，Elias 听清钱款指责后闭口反应。",
+        "场景": "大厅-白天",
+        "环境光影": "右侧窗光。",
+        "人物位置关系": "Mara 与 Elias 在大厅窄桌两侧相对站立，视线连接双方。"
+      },
+      "props": []
+    }
+  ],
+  "evaluation": {
+    "brief": "生成节选：Mara 与 Elias 隔窄桌相对站立。Mara 从直立小幅前倾，连续说：You lied to me about the money. I checked the account this morning, and every payment went straight to you. Elias 双肩原本微耸，听清钱款指责后避开目光又望回，双肩缓慢落低；他不说话，不移动脚位。",
+    "manual_checks": [
+      "三个实际镜头各为3秒、2秒、3秒，固定机位承载有效讲话或反应，不一律按2秒切断。",
+      "Mara 原台词只登记一次，0.2至7.8秒自然连贯发声，覆盖第3至5秒的 Elias 动作反应，切镜不添加停声。",
+      "Elias 信息到达后才落肩，反打与返回均承接双方姿态和关系，不在句末重做反应。",
+      "无多余动作特写、面部特写或中全景；原场景、站位、声音类别保持，静态停留按实际内容识别。"
+    ]
+  },
+  "action_tracks": [
+    {
+      "id": "Mara-lean",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "质问中的前倾与反应镜头肩背承接，不增加位移。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Mara.posture": "直立"
+          },
+          "after": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "action_text": "Mara 从直立姿态随质问小幅前倾，肩背渐紧，脚下位置不变。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 3,
+          "before": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "after": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "action_text": "Mara 在前景可见的肩背继续保持前倾后的状态，不重做前倾。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 5,
+          "before": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "after": {
+            "Mara.posture": "小幅前倾，肩背紧"
+          },
+          "action_text": "Mara 继续原句时保持小幅前倾后的上身，肩背仍紧，不重新前倾或改变脚位。"
+        }
+      ],
+      "end_state": {
+        "Mara.posture": "小幅前倾，肩背紧"
+      }
+    },
+    {
+      "id": "Elias-shoulders",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "示例原文明确 Elias 从双肩微耸到缓慢落低的无声反应；只在听清钱款指责后发生。",
+      "end_state": {
+        "Elias.shoulders": "肩线落低，脚位未变"
+      },
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Elias.shoulders": "双肩微耸"
+          },
+          "after": {
+            "Elias.shoulders": "双肩微耸"
+          },
+          "action_text": "Elias 在前景维持双肩微耸的起始姿态。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 3,
+          "before": {
+            "Elias.shoulders": "双肩微耸"
+          },
+          "after": {
+            "Elias.shoulders": "肩线落低，脚位未变"
+          },
+          "action_text": "Elias 听清钱款指责后，双肩从微耸状态缓慢落低，脚下位置不动。"
+        },
+        {
+          "segment_id": "S1",
+          "shot_start": 5,
+          "before": {
+            "Elias.shoulders": "肩线落低，脚位未变"
+          },
+          "after": {
+            "Elias.shoulders": "肩线落低，脚位未变"
+          },
+          "action_text": "Elias 前景肩背承接刚才落低后的状态，不再次耸起或重演反应。"
+        }
+      ]
+    }
+  ],
+  "mode": "真人剧"
+}

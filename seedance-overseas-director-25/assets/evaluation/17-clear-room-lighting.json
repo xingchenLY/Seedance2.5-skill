@@ -1,0 +1,181 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "Put it down."
+    },
+    {
+      "id": "L2",
+      "episode": "current",
+      "speaker": "Elias",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "I will."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 4,
+      "english_words": 3,
+      "shots": [
+        {
+          "start": 0,
+          "end": 2,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在右后方桌北端面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景桌南端，与 Mara 隔桌相对"
+              }
+            ]
+          },
+          "camera_text": "平视固定，保持稳定。",
+          "visual_text": "Mara 保持下颌绷紧的状态开口，口型对齐原句。Mara 的左侧脸受东窗光照亮。",
+          "view": {
+            "space": "大厅",
+            "position": "长桌南端 Elias 右肩后",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [
+              "Elias"
+            ],
+            "background": "Mara 身后的北墙"
+          },
+          "static_spans": []
+        },
+        {
+          "start": 2,
+          "end": 4,
+          "frame_id": "分镜2",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "camera-1",
+          "end_camera": "camera-1",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "以肩背留在右前景桌北端，与 Elias 隔桌相对"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "在左后方桌南端面向 Mara"
+              }
+            ]
+          },
+          "camera_text": "硬切到当前摄影位置，平视固定。",
+          "visual_text": "Elias 开口回应，口型对齐原句，下颌仍紧。Elias 的右侧脸受同一东窗光照亮。",
+          "view": {
+            "space": "大厅",
+            "position": "长桌北端 Mara 左肩后",
+            "direction": "Elias",
+            "height": "人物眼高",
+            "subject": "Elias",
+            "foreground": [
+              "Mara"
+            ],
+            "background": "Elias 身后的南墙"
+          },
+          "static_spans": []
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "start": 0.2,
+          "end": 1.7,
+          "estimated_seconds": 1.5,
+          "text": "Put it down.",
+          "performance": "音量偏低，咬字清楚，重读 down，句尾音量保持"
+        },
+        {
+          "source_id": "L2",
+          "speaker": "Elias",
+          "kind": "dialogue",
+          "text": "I will.",
+          "start": 2.1,
+          "end": 3.5,
+          "estimated_seconds": 1.4,
+          "performance": "音量偏低，咬字清楚，重读 will，句尾收声，不另加停顿"
+        }
+      ],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "Mara 与 Elias 保持隔桌对视，两人说话音量偏低。",
+        "场景": "大厅-白天",
+        "环境光影": "大厅东窗柔光照入，Mara 靠窗的左侧脸较亮，Elias 靠窗的右侧脸较亮，暗侧眼神和口型清楚。",
+        "人物位置关系": "Mara 与 Elias 面对面站立。"
+      },
+      "props": []
+    }
+  ],
+  "evaluation": {
+    "brief": "生成4秒节选：大厅只有东窗日光，空气清透，无烟雾效果。Mara 在桌北端朝南，Elias 在桌南端朝北。两人固定站位。Mara: \"Put it down.\" Elias: \"I will.\"",
+    "manual_checks": [
+      "最终文本采用真实东窗柔光，没有为了术语增加雾、光束、灯或动作。",
+      "反打后按人体朝向区分Mara左侧与Elias右侧，固定东窗不翻转。"
+    ],
+    "rejected_example": "空气清透的房间凭空出现浓雾，北窗体积光穿过两人。",
+    "rejection_reason": "改变已知空气条件与唯一东窗位置，新增特效没有依据。"
+  },
+  "action_tracks": [],
+  "mode": "真人剧"
+}

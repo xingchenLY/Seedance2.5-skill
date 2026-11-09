@@ -1,0 +1,110 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 1,
+      "english_words": 0,
+      "shots": [
+        {
+          "start": 0,
+          "end": 1,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara",
+            "Elias"
+          ],
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在右后方桌北端面向 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "以肩背留在左前景桌南端，与 Mara 隔桌相对"
+              }
+            ]
+          },
+          "camera_text": "桌侧斜前方固定，主拍 Mara，构图下沿保留右手、近处杯子和桌沿，不另切局部。",
+          "visual_text": "Mara 与 Elias 仍分处窄桌两侧，原位置和朝向保持。",
+          "static_spans": []
+        }
+      ],
+      "speech": [],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "本段无对白，Mara 与 Elias 保持隔桌相对。",
+        "场景": "大厅-白天",
+        "环境光影": "东窗直射日光穿过盛水玻璃杯，在桌面形成弯曲焦散亮纹；杯子与右手的接触清楚可见。",
+        "人物位置关系": "Mara 与 Elias 在桌两侧相对，Mara 右手起初在桌沿，杯子在其手前近处。",
+        "特殊道具": "桌上已有盛水玻璃杯。"
+      },
+      "pre_round_duration": 1.5
+    }
+  ],
+  "evaluation": {
+    "brief": "生成无台词节选：Mara右手从桌沿取起近处盛水玻璃杯。东窗直射光在桌面形成杯子的焦散亮纹。杯子无关键剧情作用，普通取物在原镜内利落完成。",
+    "manual_checks": [
+      "焦散来自已有直射光、水杯及桌面落点。",
+      "取杯起手、握稳、提起保留，焦散变化与杯子抬起同步。",
+      "没有为焦散新增特写或等待，沿用1秒动作区间。"
+    ],
+    "rejected_example": "取起杯子后切到无依据的手部特写，聚光追着杯子停留3秒展示焦散。",
+    "rejection_reason": "普通动作不需特写；新增聚光与停留破坏光源依据和原节奏。"
+  },
+  "action_tracks": [
+    {
+      "id": "cup-pickup",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "原文普通取杯，右手由桌沿取近处杯子，不加特写。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Mara.right_hand": "空手停在桌沿",
+            "cup.owner": "桌面上"
+          },
+          "after": {
+            "Mara.right_hand": "握稳杯身提离桌面",
+            "cup.owner": "Mara右手"
+          },
+          "action_text": "Mara 右手从桌沿抬起，伸向近处杯身握稳并直接提离桌面，起手、接触与结果在同一画面内连贯可见，双方位置不变。杯底离开桌面时，原焦散亮纹随杯子抬起发生变化。"
+        }
+      ],
+      "end_state": {
+        "Mara.right_hand": "握稳杯身提离桌面",
+        "cup.owner": "Mara右手"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

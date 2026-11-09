@@ -1,0 +1,197 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Mara",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "Put it down."
+    },
+    {
+      "id": "L2",
+      "episode": "current",
+      "speaker": "Elias",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "I will."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 4,
+      "english_words": 3,
+      "shots": [
+        {
+          "start": 0,
+          "end": 2,
+          "frame_id": "分镜1",
+          "start_scale": "中近景",
+          "end_scale": "中近景",
+          "start_camera": "camera-0",
+          "end_camera": "camera-0",
+          "visible_characters": [
+            "Mara"
+          ],
+          "relation": {
+            "mode": "remote",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara"
+            ]
+          },
+          "camera_text": "平视固定，中近景下沿容纳下胸前的自然手势，保持稳定。",
+          "visual_text": "Mara 在大厅窗边开口说原句，口型与本人声音同步；Elias 在异地电话另一端，不在本地画面中。Mara 的面部借大厅墙面反射光可辨。",
+          "view": {
+            "space": "大厅",
+            "position": "Mara 窗边斜前方",
+            "direction": "Mara",
+            "height": "人物眼高",
+            "subject": "Mara",
+            "foreground": [],
+            "background": "大厅北窗"
+          },
+          "static_spans": []
+        },
+        {
+          "start": 2,
+          "end": 4,
+          "frame_id": "分镜2",
+          "start_scale": "近景",
+          "end_scale": "近景",
+          "start_camera": "camera-1",
+          "end_camera": "camera-1",
+          "visible_characters": [
+            "Elias"
+          ],
+          "relation": {
+            "mode": "remote",
+            "characters": [
+              "Elias",
+              "Mara"
+            ],
+            "scene_characters": [
+              "Elias"
+            ]
+          },
+          "camera_text": "硬切到当前摄影位置，平视固定，近景保留头部与双肩。",
+          "visual_text": "Elias 在另一地点休息室桌旁开口低声应答，口型与本人声音同步；Mara 在异地电话另一端，不在本地画面中。Elias 延续休息室暖色顶灯的受光，南墙保持较暗。",
+          "view": {
+            "space": "休息室",
+            "position": "Elias 桌边斜前方",
+            "direction": "Elias",
+            "height": "人物眼高",
+            "subject": "Elias",
+            "foreground": [],
+            "background": "休息室南墙"
+          },
+          "static_spans": []
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Mara",
+          "kind": "dialogue",
+          "start": 0.2,
+          "end": 1.7,
+          "estimated_seconds": 1.5,
+          "text": "Put it down.",
+          "performance": "音量偏低，咬字清楚，重读 down，句尾音量保持"
+        },
+        {
+          "source_id": "L2",
+          "speaker": "Elias",
+          "kind": "dialogue",
+          "text": "I will.",
+          "start": 2.1,
+          "end": 3.5,
+          "estimated_seconds": 1.4,
+          "performance": "音量偏低，咬字清楚，重读 will，句尾收声，不另加停顿"
+        }
+      ],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，各镜头使用固定机位，人物动作按正常速度呈现。",
+        "对话氛围": "Mara 与 Elias 在电话两端低声说话，各自保持手机贴耳。",
+        "场景": "大厅-白天、休息室-夜晚",
+        "环境光影": "大厅北窗日光落在 Mara 肩后，已有浅色墙面反射保留面部；休息室暖色顶灯照亮 Elias 面部与桌边，南墙较暗。",
+        "人物位置关系": "Mara 在大厅窗边；Elias 在另一地点休息室桌旁，双方未同处一室。"
+      },
+      "props": [
+        "Mara 通话手机",
+        "Elias 通话手机"
+      ]
+    }
+  ],
+  "evaluation": {
+    "brief": "生成4秒节选：跨时区通话，大厅白天Mara处有北窗和浅色墙面；休息室夜晚Elias处有暖色顶灯。Mara: \"Put it down.\" Elias: \"I will.\" 各自持机，双端地点已揭晓。",
+    "manual_checks": [
+      "分别保留大厅日光与休息室顶灯，不把异地光源复制为一套。",
+      "发声口型与人物对应，两处空间互不合并。"
+    ],
+    "rejected_example": "Elias在休息室反打时承接大厅北窗的白天光线。",
+    "rejection_reason": "误把跨地点剪辑当成同一空间的光源连续。"
+  },
+  "action_tracks": [
+    {
+      "id": "Mara-hand",
+      "episode": "current",
+      "time_layer": "present-hall",
+      "basis": "对白中的自然下压手势，空闲左手，手机不换手。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 0,
+          "before": {
+            "Mara.left_hand": "松停在身前下胸处"
+          },
+          "after": {
+            "Mara.left_hand": "小幅下压后收住"
+          },
+          "action_text": "Mara 右手持手机贴右耳，左手从身前下胸处随 down 小幅向下压一次，在画幅内收住，右手不换位。"
+        }
+      ],
+      "end_state": {
+        "Mara.left_hand": "小幅下压后收住"
+      }
+    },
+    {
+      "id": "Elias-shoulders",
+      "episode": "current",
+      "time_layer": "present-lounge",
+      "basis": "应答时肩背紧张略松，仍有压力。",
+      "beats": [
+        {
+          "segment_id": "S1",
+          "shot_start": 2,
+          "before": {
+            "Elias.shoulders": "略耸紧绷"
+          },
+          "after": {
+            "Elias.shoulders": "小幅下沉后停住"
+          },
+          "action_text": "Elias 右手持手机贴右耳，从双肩略耸的状态随 will 让肩线小幅下沉后停住，手机未移位。"
+        }
+      ],
+      "end_state": {
+        "Elias.shoulders": "小幅下沉后停住"
+      }
+    }
+  ],
+  "mode": "真人剧"
+}

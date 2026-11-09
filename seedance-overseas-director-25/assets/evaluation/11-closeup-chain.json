@@ -1,0 +1,161 @@
+{
+  "episodes": [
+    {
+      "id": "current",
+      "complete": false
+    }
+  ],
+  "sources": [
+    {
+      "id": "L1",
+      "episode": "current",
+      "speaker": "Elias",
+      "kind": "dialogue",
+      "language": "en",
+      "text": "You were right."
+    }
+  ],
+  "segments": [
+    {
+      "id": "S1",
+      "episode": "current",
+      "duration": 3,
+      "english_words": 3,
+      "shots": [
+        {
+          "start": 0,
+          "end": 2,
+          "frame_id": "分镜1",
+          "start_scale": "面部特写",
+          "end_scale": "面部特写",
+          "start_camera": "face-0",
+          "end_camera": "face-0",
+          "visible_characters": [
+            "Mara"
+          ],
+          "view": {
+            "space": "大厅",
+            "position": "桌南端 Elias 左侧",
+            "direction": "桌北端的 Mara",
+            "height": "双方站姿眼高",
+            "subject": "Mara",
+            "foreground": [],
+            "background": "北窗"
+          },
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Mara",
+              "Elias"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Mara",
+                "visibility": "visible",
+                "placement": "在桌北端朝向画左外的 Elias"
+              },
+              {
+                "character": "Elias",
+                "visibility": "offscreen",
+                "placement": "位于画左外的桌南端，面向 Mara"
+              }
+            ],
+            "single_reason": "本镜原文指定的面部细小变化承担新的信息，近距离读取完整面部，另一人按既定画外方位承接。"
+          },
+          "camera_text": "平视固定，完整面部取景，保留双眼与嘴部，不裁成器官局部。",
+          "visual_text": "Mara 原本抿住嘴唇，Elias 的原台词从画外传来；听完承认后她的嘴角轻微上抬，随即重新抿住，不开口。",
+          "static_spans": []
+        },
+        {
+          "start": 2,
+          "end": 3,
+          "frame_id": "分镜2",
+          "start_scale": "面部特写",
+          "end_scale": "面部特写",
+          "start_camera": "face-1",
+          "end_camera": "face-1",
+          "visible_characters": [
+            "Elias"
+          ],
+          "view": {
+            "space": "大厅",
+            "position": "桌北端 Mara 右侧",
+            "direction": "桌南端的 Elias",
+            "height": "双方站姿眼高",
+            "subject": "Elias",
+            "foreground": [],
+            "background": "南墙"
+          },
+          "relation": {
+            "mode": "same_scene",
+            "characters": [
+              "Elias",
+              "Mara"
+            ],
+            "scene_characters": [
+              "Mara",
+              "Elias"
+            ],
+            "placements": [
+              {
+                "character": "Elias",
+                "visibility": "visible",
+                "placement": "在桌南端朝向画右外的 Mara"
+              },
+              {
+                "character": "Mara",
+                "visibility": "offscreen",
+                "placement": "位于画右外的桌北端，面向 Elias"
+              }
+            ],
+            "single_reason": "本镜原文指定的面部细小变化承担新的信息，近距离读取完整面部，另一人按既定画外方位承接。"
+          },
+          "camera_text": "硬切到轴线同侧的反向实际机位，平视固定，完整面部取景。",
+          "visual_text": "Elias 看见 Mara 刚才嘴角的变化，下颌从原状态逐渐绷紧，保持嘴部闭合；Mara 仍在原位画外。",
+          "static_spans": []
+        }
+      ],
+      "speech": [
+        {
+          "source_id": "L1",
+          "speaker": "Elias",
+          "kind": "dialogue",
+          "start": 0.1,
+          "end": 1.3,
+          "estimated_seconds": 1.2,
+          "text": "You were right.",
+          "performance": "低声，咬字清楚，重读 right"
+        }
+      ],
+      "cast": [
+        "Mara",
+        "Elias"
+      ],
+      "presentation": {
+        "整体风格": "真人写实，固定机位。",
+        "对话氛围": "Elias 低声说话后闭口，两人隔桌对视。",
+        "场景": "大厅-白天",
+        "环境光影": "右侧窗光按人物实际朝向承接。",
+        "人物位置关系": "Mara 在桌北端，Elias 在桌南端，两人隔桌相对，站位不变。"
+      },
+      "pre_round_duration": 3.5,
+      "props": []
+    }
+  ],
+  "action_tracks": [],
+  "evaluation": {
+    "brief": "同场节选：Mara 与 Elias 隔桌相对。Elias 说“You were right.”。Mara 原本抿住嘴唇，听完承认后嘴角轻微上抬，随即重新抿住，试图掩饰；Elias 看见这一变化，下颌逐渐绷紧，没有接话。两处细小表情分别构成掩饰破绽与对方察觉，需要完整面部特写读清，按因果连续切换，不重复同一反应。",
+    "manual_checks": [
+      "同段允许必要的面部特写接面部特写，完整面部而非眼睛或嘴部器官特写",
+      "两侧真实机位不同，视线和桌两侧关系承接，没有为同框改距离",
+      "Mara 在语义足够后反应，Elias 察觉在其后，不提前知情",
+      "Elias 原声只出现一次，Mara 不代说，没有为特写连切增加台词、空镜或延长节奏",
+      "本例整段估值3.5秒直接去小数为3秒，原声不缩短；无声动作或结果利落呈现，核对可见过程与信息可读性。"
+    ]
+  },
+  "mode": "真人剧"
+}
