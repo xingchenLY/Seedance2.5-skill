@@ -1,0 +1,4 @@
+interface:
+  display_name: "资产自动化流程"
+  short_description: "共用资产表整理，完成后出图才选 Codex 或剧梦；图片检查、命名、保存和归档沿用原流程"
+  default_prompt: "使用 $overseas-live-action-asset-pipeline（资产自动化流程），先选择国内或海外并整理保存资产表；需要图片时在表格完成后询问 Codex 或剧梦出图，后续检查和资产存储沿用原流程，剧梦出图步骤待导入。"

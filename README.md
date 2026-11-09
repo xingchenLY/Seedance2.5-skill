@@ -1,11 +1,13 @@
 # Seedance 2.5 Skills
 
-本仓库保留两个 Skill 的完整源码目录；`.skill` 和 `.zip` 安装包统一在 [Releases](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest) 中下载和更新。
+本仓库保留三个 Skill 的完整源码目录；`.skill` 和 `.zip` 安装包统一在 [Releases](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest) 中下载和更新。
 
 | Skill | 完整目录 | Skill 包 | ZIP 安装包 |
 | --- | --- | --- | --- |
 | Seedance2.5导演 | [seedance-overseas-director-25](seedance-overseas-director-25/) | [下载 .skill](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest/download/seedance-director-2.5.skill) | [下载 .zip](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest/download/seedance-director-2.5.zip) |
 | 剧梦自动化流程 | [jumeng-video-operator](jumeng-video-operator/) | [下载 .skill](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest/download/jumeng-video-operator.skill) | [下载 .zip](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest/download/jumeng-video-operator.zip) |
+
+| 资产自动化流程 | [overseas-live-action-asset-pipeline](overseas-live-action-asset-pipeline/) | [下载 .skill](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest/download/overseas-live-action-asset-pipeline.skill) | [下载 .zip](https://github.com/xingchenLY/Seedance2.5-skill/releases/latest/download/overseas-live-action-asset-pipeline.zip) |
 
 ## 安装
 
