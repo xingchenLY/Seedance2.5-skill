@@ -1,0 +1,53 @@
+name: Publish asset automation skill
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'overseas-live-action-asset-pipeline/**'
+      - '.github/workflows/publish-asset-skill.yml'
+permissions:
+  contents: write
+concurrency:
+  group: publish-asset-skill
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Build and validate installation packages
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import pathlib, subprocess, zipfile, hashlib, shutil
+          root = pathlib.Path('overseas-live-action-asset-pipeline')
+          assert (root / 'SKILL.md').is_file()
+          files = subprocess.check_output(['git', 'ls-files', '-z', '--', str(root)]).decode().strip('\0').split('\0')
+          assert files and all(pathlib.Path(f).is_file() for f in files)
+          out = pathlib.Path('dist')
+          out.mkdir(exist_ok=True)
+          package = out / (root.name + '.skill')
+          with zipfile.ZipFile(package, 'w', compression=zipfile.ZIP_DEFLATED) as z:
+              for f in sorted(files):
+                  z.write(f, f)
+          with zipfile.ZipFile(package) as z:
+              assert z.testzip() is None
+              assert set(z.namelist()) == set(files)
+              for f in files:
+                  assert z.read(f) == pathlib.Path(f).read_bytes()
+          shutil.copyfile(package, package.with_suffix('.zip'))
+          for p in sorted(out.iterdir()):
+              print(p.name, hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
+      - name: Upload packages to existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release view v1.0.0
+          gh release upload v1.0.0 \
+            'dist/overseas-live-action-asset-pipeline.skill#资产自动化流程.skill' \
+            'dist/overseas-live-action-asset-pipeline.zip#资产自动化流程.zip' \
+            --clobber
