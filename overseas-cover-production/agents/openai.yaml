@@ -1,0 +1,4 @@
+interface:
+  display_name: "海外封面制作"
+  short_description: "依据剧本和人物资产制作六张横竖封面，评选最佳版本用于shortmax"
+  default_prompt: "使用 $overseas-cover-production 制作海外短剧封面；请先检查剧本、人物文件夹、剧名和封面存储路径四项必填输入。"
