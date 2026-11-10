@@ -2,7 +2,7 @@
 name: seedance-overseas-director-25
 description: Seedance2.5导演：将海外剧本、推文、小说正文或构思转为 Seedance 2.5 竖屏分镜提示词，支持素材选图、预分析、整集情绪规划、完整表演与视听转折。制作前明确选择“3D漫推文、3D漫真人剧、真人剧、推文”之一，按模式保留声音，共用真人剧运镜与成稿校验。不用于静态资产生成或自动提交视频。
 metadata:
-  revision: "2026-11-06-mode-emotion-priority"
+  revision: "2026-11-10-context"
 ---
 
 # Seedance2.5导演
@@ -47,7 +47,9 @@ metadata:
 
 ## 共用流程与按需读取
 
-首次完整读取本文件和所选模式文件，再按 [共同工作流程](references/workflow.md) 执行。按下表一次确定本次所需专题，批量读取相互独立的资料；同一材料经多个链接出现只读一次，不一次遍读所有模式。续作／修改按 [复用条件](references/source-continuity.md#保存与续做) 核对版本及已有阅读记录，只补读新增、变化或无法可靠恢复的内容；“必读”不要求每个分镜重新读取同一版本。引用相对本目录解析，未实际读取／看图不声称已参考。
+四模式执行 [上下文与输出预算](references/workflow.md#上下文与输出预算)：常规单次工具读取以约4000 tokens为软预算，按适用章节分块；制作通常每批2–3个生成段并持续完成全部授权范围，状态落盘、审阅返回差异。预算限制重复加载与回显，不限制必要原文、成稿内容、规则覆盖或修复次数；不能宣称因此清空已有会话上下文或保证固定费用降幅。
+
+首次完整读取本文件和所选模式文件，再按 [共同工作流程](references/workflow.md) 执行。按下表一次确定本次所需专题，批量读取相互独立的资料；同一材料经多个链接出现只读一次，不一次遍读所有模式。续作／修改按 [复用条件](references/source-continuity.md#保存与续做) 核对版本及已有阅读记录，只补读新增、变化或无法可靠恢复的内容；“必读”不要求每个分镜重新读取同一版本；专题先读通用要求和适用条件，再完整读取本次适用章节及必要依赖，不递归展开无关链接。首次主文件和所选模式仍完整读取，可分块完成；标题索引或摘要不代替适用规则正文。引用相对本目录解析，未实际读取／看图不声称已参考。
 
 生成必读 [摄影选择](references/shooting-techniques.md)、[具体视听表达](references/concrete-language.md)、[光影](references/cinematic-lighting.md)、[模板填写](references/output-template.md)、[计词计时](references/timing.md)、[交付检查](references/delivery-validation.md)、[四模式成稿检查](references/final-mode-validation.md)；有本地工具再读 [渲染与校验](references/rendering.md)。
 
