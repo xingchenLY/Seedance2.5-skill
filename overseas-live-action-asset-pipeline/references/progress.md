@@ -57,6 +57,8 @@ state.json 留在工作区，每次事件原子写入并增加 revision；由一
 
 ## 下一步
 
+剧梦调度先核对已在途的平台结果并下载成图，再处理 inspect/save/deliver，最后才派发 generate/retry_generation；完整优先级见 [结果回收规则](result-recovery.md)。本地 wait 仅表示尚未记录返回，不能替代网页完成核对；不要只过滤生成动作就误认没有待下载结果。状态写入仍使用实际句柄与真实文件，未知结果不重复提交。
+
 | action | 执行 |
 | --- | --- |
 | design | 本项仍在本次范围内；补全提示词及引用后 init --partial，不可生成或算完成 |
