@@ -254,7 +254,8 @@ class PipelineTests(unittest.TestCase):
 
     def test_repeated_terminal_error_pauses_only_one_asset(self):
         first, second = [x["id"] for x in self.init()]
-        for number in range(2):
+        for number in range(6):
+            self.assertEqual(self.actions()[first], "generate")
             self.event(first, "generating", handle="handle-" + str(number))
             self.event(first, "failed", stage="generation", terminal=True, code="service", message="terminal failure")
         self.assertEqual(self.actions(), {first: "paused", second: "generate"})
@@ -304,9 +305,19 @@ class PipelineTests(unittest.TestCase):
         state.initialize(self.state_path, self.request_path, self.plan_path)
         self.assertEqual(self.actions()[identifier], "text_only")
 
+    def test_five_quality_retries_then_pause(self):
+        identifier = self.init(selected_assets={"人物": [{"name": "艾玛", "count": 1}]})[0]["id"]
+        for number in range(6):
+            self.assertIn(self.actions()[identifier], {"generate", "retry_generation"})
+            self.event(identifier, "generating", handle="quality-" + str(number))
+            self.event(identifier, "generated", source_path=str(self.picture()))
+            self.event(identifier, "checked", approved=False, single_person=True,
+                       code="quality-" + str(number), note="visible defect")
+            self.assertEqual(self.actions()[identifier], "paused" if number == 5 else "retry_generation")
+
     def test_resume_paused_after_fix(self):
         identifier = self.init(selected_assets={"人物": [{"name": "艾玛", "count": 1}]})[0]["id"]
-        for _ in range(2):
+        for _ in range(6):
             self.event(identifier, "generating", handle="existing-handle")
             self.event(identifier, "failed", stage="generation", terminal=True, code="service", message="unavailable")
         with self.assertRaises(ValueError): self.event(identifier, "retry")

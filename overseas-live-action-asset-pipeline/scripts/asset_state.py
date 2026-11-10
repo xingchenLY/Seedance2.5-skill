@@ -188,7 +188,7 @@ def next_action(state, item):
     if item.get("used_reference_hashes") is not None and item["used_reference_hashes"] != references:
         return "replan_references"
     failure = item.get("failure", {})
-    if failure.get("stage") in {"generation", "quality"} and failure.get("count", 0) >= 2:
+    if failure.get("stage") in {"generation", "quality"} and failure.get("count", 0) >= 6:  # Initial attempt plus five regeneration retries.
         return "paused"
     if source and item.get("review", {}).get("approved") is False:
         return "retry_generation" if ready_preflight(item) else "preflight"
