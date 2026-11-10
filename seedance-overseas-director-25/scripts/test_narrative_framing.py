@@ -138,7 +138,11 @@ class NarrativeFramingTests(unittest.TestCase):
         self.assertNotIn('narrative_framing', text)
 
     def test_render_and_final_validation_clis_surface_review_without_changing_prompt(self):
+        from test_narrative_budget import budgeted_fixture
         data = rich_plan('推文')
+        data = budgeted_fixture(data, data['sources'][0]['text'] +
+                                ' His left hand kept the phone facing toward me.')
+        data['segments'][0]['narration_coverage'][-1]['text'] += ' His left hand kept the phone facing toward me.'
         for shot, scale in zip(data['segments'][0]['shots'], ('中景', '全景', '中全景')):
             shot.update(start_scale=scale, end_scale=scale)
         with tempfile.TemporaryDirectory() as folder:

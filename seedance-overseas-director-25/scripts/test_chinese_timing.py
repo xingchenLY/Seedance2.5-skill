@@ -94,16 +94,15 @@ class ChineseTimingTests(unittest.TestCase):
         plan, _ = render_plan(data)
         self.assertEqual(plan['segments'][0]['english_words'], 1)
 
-    def test_portuguese_part_needs_its_own_estimate_not_chinese_rate(self):
-        data = data_sample(text='一二三四五六七Por quê?', seconds=2.5)
+    def test_portuguese_part_uses_shared_word_rate_not_supplied_padding(self):
+        data = data_sample(text='一二三四五六七Por quê?', seconds=1.6)
         data['sources'][0].update(language='mul', language_exception_basis='合成原句明确中文后接葡语。')
         voice = data['segments'][0]['speech'][0]
         voice['language_parts'] = [dict(language='zh', text='一二三四五六七'), dict(language='pt', text='Por quê?')]
-        with self.assertRaisesRegex(ValueError, 'pt part needs its own'):
-            render_plan(data)
+        render_plan(data)
         voice['language_parts'][1]['estimated_seconds'] = 1.5
         plan, _ = render_plan(data)
-        self.assertEqual(plan['segments'][0]['speech'][0]['estimated_seconds'], 2.5)
+        self.assertEqual(plan['segments'][0]['speech'][0]['estimated_seconds'], 1.6)
 
     def test_real_pause_is_added_once_with_basis_and_not_inferred_from_punctuation(self):
         data = data_sample(seconds=2.4)

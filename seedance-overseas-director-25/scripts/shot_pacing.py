@@ -36,6 +36,13 @@ def check_segment_duration(segment, label, errors, required=False):
     if 'pre_round_duration' not in segment:
         return
     raw = segment['pre_round_duration']
+    lock = segment.get('narrative_budget')
+    if lock is not None:
+        if not finite_number(raw) or raw <= 0:
+            errors.append(f'{label}: narrative pre_round_duration must be positive speech time')
+        elif duration != math.ceil(raw - EPS):
+            errors.append(f'{label}: narrative duration must equal ceil of locked speech time')
+        return
     if not finite_number(raw) or raw < 1:
         errors.append(f'{label}: pre_round_duration must be a finite number of at least 1 second')
     elif duration != math.floor(raw):

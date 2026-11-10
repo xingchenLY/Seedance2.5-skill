@@ -128,11 +128,14 @@ class NarrativeVisualPacingTests(unittest.TestCase):
             self.assertNotIn('REVIEW', text)
 
     def test_cli_render_plan_and_final_validation_surface_same_scope(self):
+        from test_narrative_budget import budgeted_fixture
         scripts = Path(__file__).resolve().parent
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             source, prompt, derived = root/'source.json', root/'final.txt', root/'plan.json'
-            source.write_text(json.dumps(mode_sample('推文'), ensure_ascii=False), encoding='utf-8')
+            data = budgeted_fixture(mode_sample('推文'),
+                'Put it down and leave it exactly where it is right now, please.')
+            source.write_text(json.dumps(data, ensure_ascii=False), encoding='utf-8')
             result = subprocess.run([sys.executable, '-B', '-X', 'utf8', str(scripts/'render_prompt.py'), str(source),
                                      '--output', str(prompt), '--plan-output', str(derived)],
                                     capture_output=True, text=True, encoding='utf-8')

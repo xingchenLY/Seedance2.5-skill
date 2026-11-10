@@ -45,6 +45,10 @@ def fmt(value):
 
 
 def prepare_plan(authored):
+    from narrative_budget import check_narrative_budgets
+    budget_errors = check_narrative_budgets(authored)
+    if budget_errors:
+        raise ValueError('\n'.join(budget_errors))
     plan = deepcopy(authored)
     # Any render invalidates earlier manual review; the user/model reviews the new final text.
     plan.pop('delivery_review', None)
@@ -198,6 +202,10 @@ def main():
             raise ValueError('Input, rendered prompt and derived plan must use different paths')
         authored = json.loads(args.plan.read_text(encoding='utf-8-sig'))
         require_mode(authored)
+        from narrative_budget import check_narrative_budgets
+        budget_errors = check_narrative_budgets(authored, required=True)
+        if budget_errors:
+            raise ValueError('\n'.join(budget_errors))
         from language_policy import require_content_language
         require_content_language(authored)
         plan, text = render_plan(authored)

@@ -108,8 +108,10 @@ def speech_english_words(speech, language, label, errors):
         return count
     if language == 'mul' or (language in NON_LATIN_LANGUAGES and re.search(r'[A-Za-z]', text)):
         errors.append(f'{label}: mixed language requires explicit language_parts')
-    if language == 'en':
-        return english_words(counting_form(speech, text, label, errors))
+    if language in {'en', 'es', 'pt'}:
+        count = english_words(counting_form(speech, text, label, errors))
+        # The word-rate estimate is shared; the existing English-only cap is not.
+        return count if language == 'en' else 0
     if language == 'zh':
         # Chinese readings use the same numeric-range protection, but have an
         # independent character counter and never add to the English limit.
@@ -256,6 +258,8 @@ def validate(plan):
     require_object(plan, 'plan')
     errors = []
     from mode_rules import narrative_mode, check_mode, overlap_allowed
+    from narrative_budget import check_narrative_budgets
+    errors.extend(check_narrative_budgets(plan))
     limits = {'english_words': 96, 'segment_seconds': 30, 'episode_seconds': 50 if narrative_mode(plan) else 0,
               'unrelated_prefix_seconds': 4}
     overrides = require_object(plan.get('limits', {}), 'limits')
@@ -457,6 +461,12 @@ def validate_timing_preflight(plan):
     """Check minimal timing records before authoring camera/continuity metadata."""
     from shot_pacing import check_segment_duration
     errors = []
+    from narrative_budget import check_narrative_budgets, NARRATIVE
+    if plan.get('mode') in NARRATIVE and any('narrative_budget' in s for s in plan.get('segments', [])):
+        errors.extend(check_narrative_budgets(plan, required=True))
+        for item in plan['segments']:
+            check_segment_duration(item, item['id'], errors, required=True)
+        return errors
     overrides = require_object(plan.get('limits', {}), 'limits')
     if overrides:
         string(plan, 'limits_basis')
@@ -498,6 +508,8 @@ def main():
         if args.timing_only and args.final_prompt:
             raise ValueError('--timing-only cannot replace or combine with --final-prompt')
         findings = validate_timing_preflight(plan) if args.timing_only else validate(plan)
+        from narrative_budget import check_narrative_budgets
+        findings.extend(check_narrative_budgets(plan, required=True))
         structure_ok = not findings
         if args.final_prompt:
             from delivery_checks import validate_delivery

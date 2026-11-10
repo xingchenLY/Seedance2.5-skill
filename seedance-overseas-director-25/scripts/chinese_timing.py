@@ -7,6 +7,8 @@ import math
 import unicodedata
 
 RATE = 7
+WORD_RATE = 3.4
+WORD_LANGUAGES = {'en', 'es', 'pt'}
 EPS = 1e-7
 
 
@@ -30,9 +32,17 @@ def leaves(record, language):
     return result
 
 
+def word_rate_seconds(record, language, label, errors):
+    """Use the same spoken-word convention for English, Spanish and Portuguese."""
+    from validate_plan import counting_form, english_words, string
+    if language.lower().split('-')[0] not in WORD_LANGUAGES:
+        return None
+    return english_words(counting_form(record, string(record, 'text'), label, errors)) / WORD_RATE
+
+
 def chinese_speech_seconds(speech, language, label, errors):
     """Return the full event estimate when it includes Chinese, otherwise None."""
-    from validate_plan import counting_form, speech_english_words, string
+    from validate_plan import counting_form, string
     parts = leaves(speech, language)
     if not any(code == 'zh' for _, code in parts):
         return None
@@ -42,16 +52,16 @@ def chinese_speech_seconds(speech, language, label, errors):
             text = counting_form(part, string(part, 'text'), label, errors)
             total += chinese_characters(text) / RATE
         elif part is not speech:
-            supplied = part.get('estimated_seconds')
-            if supplied is not None:
+            word_seconds = word_rate_seconds(part, code, label, errors)
+            if word_seconds is not None:
+                # An authored estimate cannot silently replace the shared rate.
+                total += word_seconds
+            else:
+                supplied = part.get('estimated_seconds')
                 if not finite(supplied) or supplied <= 0:
-                    errors.append(f'{label}: non-Chinese language part needs positive estimated_seconds')
+                    errors.append(f'{label}: {code} part needs its own positive estimated_seconds')
                 else:
                     total += supplied
-            elif code == 'en':
-                total += speech_english_words(part, code, label, errors) / 3.4
-            else:
-                errors.append(f'{label}: {code} part needs its own estimated_seconds; do not use Chinese 7 chars/s')
     adjustment = speech.get('chinese_timing', {})
     if (not isinstance(adjustment, dict) or set(adjustment) - {'pause_seconds', 'basis'}):
         errors.append(f'{label}: chinese_timing accepts only pause_seconds and its concrete basis')
