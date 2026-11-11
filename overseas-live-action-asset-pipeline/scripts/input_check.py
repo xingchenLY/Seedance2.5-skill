@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 import re
 import sys
-from pipeline_common import script_hash
+from pipeline_common import script_hash, read_json, file_stamp, operation_cache
+from copy import deepcopy
 from image_check import DEFAULT_MIN_SHORT_SIDE
 
 ASSET_CATEGORIES = ("人物", "场景", "道具")
@@ -226,6 +227,17 @@ def normalize_episodes(value):
     raise ValueError("集数无效；明确给出的无效集数不能默认扩大为全部")
 
 
+def normalize_jumeng_operation_mode(value):
+    if value is None or (isinstance(value, str) and not value.strip()):
+        return None
+    aliases = {"web": "web", "网页": "web", "网页操作": "web", "网页模式": "web",
+               "cli": "cli", "dreama": "cli", "dreama cli": "cli", "剧梦cli": "cli",
+               "剧梦dreama cli": "cli", "剧梦dreama cli操作": "cli", "剧梦cli模式": "cli"}
+    if not isinstance(value, str) or value.strip().lower() not in aliases:
+        raise ValueError("jumeng_operation_mode 必须选择网页/web 或 Dreama CLI/cli，不能自动或同时选择")
+    return aliases[value.strip().lower()]
+
+
 def validate_request(data):
     if not isinstance(data, dict):
         raise RequestError(["请求必须是一个 JSON 对象"])
@@ -235,6 +247,10 @@ def validate_request(data):
         raise RequestError([str(exc)]) from exc
     errors = []
     result = {"asset_workflow": workflow}
+    try:
+        result["jumeng_operation_mode"] = normalize_jumeng_operation_mode(data.get("jumeng_operation_mode"))
+    except ValueError as exc:
+        errors.append(str(exc))
     project_name = data.get("jumeng_project_name")
     if project_name is not None and (not isinstance(project_name, str) or any(c in project_name for c in "\r\n")):
         errors.append("jumeng_project_name 须为单行项目名称，不能用剧名或目录自动代填")
@@ -419,7 +435,9 @@ def validate_request(data):
             raise RequestError(["正文内容校验失败：" + str(exc)]) from exc
     jumeng_images = workflow == "jumeng" and result["generate_images"]
     result["jumeng_project_required"] = jumeng_images and not result["jumeng_project_name"]
-    result["ready_for_jumeng_setup"] = bool(jumeng_images and result["jumeng_project_name"] and result["content_validated"])
+    result["jumeng_operation_mode_required"] = jumeng_images and not result["jumeng_operation_mode"]
+    result["ready_for_jumeng_setup"] = bool(jumeng_images and result["jumeng_project_name"]
+                                            and result["jumeng_operation_mode"] and result["content_validated"])
     categories = {x["category"] for x in result.get("resolved_assets", []) if x.get("generate_image")}
     result["jumeng_episode_names"] = [c + "资产" for c in ("人物", "场景", "道具") if jumeng_images and c in categories]
     enabled = [x for x in result.get("resolved_assets", []) if x.get("generate_image")]
@@ -430,10 +448,31 @@ def validate_request(data):
 
 def load_and_validate(request_path, require_content=False):
     try:
-        data = json.loads(Path(request_path).read_text(encoding="utf-8-sig"))
+        path = Path(request_path).resolve()
+        request_stamp = file_stamp(path)
+        data = read_json(path)
+        if not isinstance(data, dict):
+            raise RequestError(['请求必须为 JSON 对象'])
+        # Never persist this cache or share it across top-level operations.
+        dependencies = [path]
+        for field in ('script_path', 'content_index'):
+            if isinstance(data.get(field), str) and data[field].strip():
+                dependencies.append(Path(data[field]).expanduser().resolve())
+        stamps = tuple((str(p), file_stamp(p)) for p in dependencies)
+        if stamps[0][1] != request_stamp:
+            raise RequestError(['请求在读取期间发生变化，请重试'])
     except (OSError, ValueError) as exc:
-        raise RequestError(["无法读取请求记录：" + str(exc)]) from exc
-    result = validate_request(data)
+        raise RequestError(["无法读取请求记录或其依赖：" + str(exc)]) from exc
+    cache = operation_cache('validated_requests')
+    key = (str(path), stamps)
+    if cache is not None and key in cache:
+        result = deepcopy(cache[key])
+    else:
+        result = validate_request(data)
+        if tuple((str(p), file_stamp(p)) for p in dependencies) != stamps:
+            raise RequestError(["请求、正文或索引在校验期间发生变化，请重试"])
+        if cache is not None:
+            cache[key] = deepcopy(result)
     if require_content and not result["content_validated"]:
         raise RequestError(["尚未完成正文索引匹配；请先建立 content_index，再开始资产生产"])
     return result

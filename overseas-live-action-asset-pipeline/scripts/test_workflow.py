@@ -60,9 +60,15 @@ class WorkflowTests(unittest.TestCase):
         state.initialize(self.state_path, self.request_path, self.plan_path)
         self.receive(identifier, "attempt-2")
         self.event(identifier, "checked", attempt_id="attempt-2", approved=False, code="cropped", note="Still cropped")
+        for n in range(3, 7):
+            self.assertEqual(self.actions()[identifier], "retry_generation")
+            attempt = "attempt-" + str(n)
+            self.receive(identifier, attempt)
+            self.event(identifier, "checked", attempt_id=attempt, approved=False,
+                       code="defect-" + str(n), note="Visible quality defect")
         self.assertEqual(self.actions()[identifier], "paused")
         item = read_json(self.state_path)["assets"][identifier]
-        self.assertEqual(len(item["attempts"]), 2)
+        self.assertEqual(len(item["attempts"]), 6)
         self.assertNotEqual(item["attempts"][0]["prompt"], item["attempts"][1]["prompt"])
         self.event(identifier, "retry", note="Composition reduced and margins corrected")
         self.assertEqual(self.actions()[identifier], "retry_generation")

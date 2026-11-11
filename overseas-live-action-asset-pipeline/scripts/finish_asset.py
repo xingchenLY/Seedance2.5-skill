@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 from asset_state import image_source, next_action, read_json, record_event, require_current_request
-from pipeline_common import emit, io_operation
+from pipeline_common import emit, io_operation, file_hash
 from save_one_asset import save_one
 
 
@@ -41,7 +41,8 @@ def finish(state_path, identifier, attempt_id=None, review=None, name=None, disp
         if next_action(state, item) == "save":
             try:
                 result = save_one(state["request_path"], image_source(item), item["category"],
-                                  name or asset_name(state, item), identifier)
+                                  name or asset_name(state, item), identifier,
+                                  link_pending=state.get('asset_workflow') == 'jumeng' and bool(item.get('pending')))
                 record_event(state_path, {**base, "event": "saved", "target_path": result["target_path"],
                                           "timing": result.get("timing")})
             except Exception as exc:
@@ -54,6 +55,24 @@ def finish(state_path, identifier, attempt_id=None, review=None, name=None, disp
                 raise
         else:
             result = {"ok": True, "status": "reused", "target_path": item["saved"]["path"]}
+    # Jumeng already authorizes cleanup after durable, verified formal archive.
+    # A failed saved event never reaches here; both files remain recoverable.
+    if state.get('asset_workflow') == 'jumeng' and state['save_assets']:
+        current = read_json(state_path)['assets'][identifier]
+        pending = current.get('pending')
+        saved = current.get('saved')
+        if pending and saved:
+            candidate = Path(pending['path']).resolve()
+            formal = Path(saved['path']).resolve()
+            pending_root = (Path(state['output_root']).resolve() / '待审').resolve()
+            try:
+                if (candidate != formal and candidate.is_relative_to(pending_root) and candidate.is_file()
+                        and file_hash(candidate) == saved['sha256'] == file_hash(formal)):
+                    candidate.unlink()
+                    result['pending_cleanup'] = 'removed_after_archive'
+            except (OSError, ValueError) as exc:
+                result['pending_cleanup'] = 'pending'
+                result['cleanup_error'] = str(exc)
     if displayed:
         record_event(state_path, {**base, "event": "delivered"})
     state = read_json(state_path)

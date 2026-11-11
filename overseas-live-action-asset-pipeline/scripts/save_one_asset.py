@@ -63,7 +63,7 @@ def inside(path, root):
     return resolved
 
 
-def _save_one(validated, source_path, category, name, kind=None):
+def _save_one(validated, source_path, category, name, kind=None, link_pending=False):
     started = perf_counter()
     if category not in {"人物", "场景", "道具"}:
         raise ValueError("资产类别只能是人物、场景或道具")
@@ -111,6 +111,30 @@ def _save_one(validated, source_path, category, name, kind=None):
                             "timing": {"copy_seconds": 0.0, "verify_seconds": 0.0,
                                        "save_seconds": perf_counter() - started}}
             continue
+        if link_pending and source.is_relative_to(inside(root / '待审' / category, root)):
+            try:
+                os.link(source, target)
+            except FileExistsError:
+                continue
+            except OSError:
+                pass  # Cross-volume/filesystem restrictions: retain the verified copy path.
+            else:
+                try:
+                    # Adding a link changes ctime, but must not change identity/content.
+                    if source_stamp(source)[:4] != original_stamp[:4]:
+                        raise ValueError('归档期间待审图片发生变化')
+                    if file_hash(source, refresh=True) != expected_hash or file_hash(target, refresh=True) != expected_hash:
+                        raise ValueError('归档链接内容与已检查图片不一致')
+                    with Image.open(target) as saved:
+                        saved.verify()
+                    return {**result, 'sha256': expected_hash, 'status': 'saved', 'storage_method': 'linked_pending',
+                            'target_path': str(target), 'timing': {'copy_seconds': 0.0,
+                            'verify_seconds': perf_counter() - started, 'save_seconds': perf_counter() - started}}
+                except Exception:
+                    # Only this invocation's exclusive link is removed; pending survives.
+                    if target.is_file():
+                        target.unlink()
+                    raise
         try:
             fd = os.open(str(target), os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o666)
         except FileExistsError:
@@ -148,7 +172,7 @@ class AssetSaver:
         self._validated = load_and_validate(request_path, require_content=True)
 
     @io_operation
-    def save(self, source_path, category, name, asset_id=None, kind=None):
+    def save(self, source_path, category, name, asset_id=None, kind=None, *, link_pending=False):
         if not self._validated["generate_images"]:
             raise ValueError("本次输出类型不包含图片，不能执行图片保存")
         inferred_kind = kind or ("turnaround" if "-三视图" in name else None)
@@ -164,7 +188,7 @@ class AssetSaver:
             raise ValueError("本项未选择图片输出，不能执行图片保存")
         if kind is not None and task["kind"] != kind:
             raise ValueError("保存图片类型与本次资产计划不一致")
-        result = _save_one(self._validated, source_path, category, name, task["kind"])
+        result = _save_one(self._validated, source_path, category, name, task["kind"], link_pending=link_pending)
         return {**result, "asset_id": task["id"]}
 
     def ready(self):
@@ -175,9 +199,9 @@ class AssetSaver:
 
 
 @io_operation
-def save_one(request_path, source_path, category, name, asset_id=None, kind=None):
+def save_one(request_path, source_path, category, name, asset_id=None, kind=None, *, link_pending=False):
     # Keep the original import and command-line API available.
-    return AssetSaver(request_path).save(source_path, category, name, asset_id, kind)
+    return AssetSaver(request_path).save(source_path, category, name, asset_id, kind, link_pending=link_pending)
 
 
 def emit(result):

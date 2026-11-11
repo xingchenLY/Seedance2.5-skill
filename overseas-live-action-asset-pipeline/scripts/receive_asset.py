@@ -14,6 +14,30 @@ from save_one_asset import (EXTENSIONS, copy_and_digest, inside, require_unchang
                             safe_stem, source_stamp)
 
 
+@io_operation
+def prepare_download(state_path, identifier, attempt_id):
+    state = read_json(state_path)
+    require_current_request(state)
+    item = state['assets'][identifier]
+    if (not state['save_assets'] or not image_enabled(state, item)
+            or item.get('current_attempt_id') != attempt_id
+            or not (item.get('generation') or item.get('source'))):
+        raise ValueError('直接下载待审须有本次图片归档目录及真实已提交尝试')
+    if item.get('source'):
+        return {'ok': True, 'status': 'already_received', 'id': identifier, 'attempt_id': attempt_id,
+                'source_path': item['source']['path'], 'note': '先恢复现有接收或核对文件，不重新下载'}
+    root = Path(state['output_root']).resolve()
+    folder = inside(root / '待审' / item['category'], root)
+    folder.mkdir(parents=True, exist_ok=True)
+    identity = object_hash([item['id'], attempt_id])[:16]
+    target = inside(folder / (safe_stem(asset_name(state, item)) + '-' + identity + '.bin'), root)
+    partial = inside(Path(str(target) + '.part'), root)
+    return {'ok': True, 'id': identifier, 'attempt_id': attempt_id,
+            'status': 'reconcile_existing' if target.exists() or partial.exists() else 'download_destination_ready',
+            'download_path': str(target), 'partial_path': str(partial), 'received': False,
+            'note': '仅返回目标；由下载工具完成写入，核对任务后再调用 receive，已有文件不得覆盖'}
+
+
 def stage_source(state, item):
     """Copy bytes, not visual approval or geometry validation; never overwrite."""
     started = perf_counter()
@@ -96,10 +120,14 @@ def main():
     parser.add_argument('state')
     parser.add_argument('--id', required=True)
     parser.add_argument('--attempt-id', required=True)
+    parser.add_argument('--prepare-download', action='store_true', help='Plan direct-to-pending download paths; does not download')
     parser.add_argument('--source', help='Actual tool result path; omit only to retry staging')
     args = parser.parse_args()
     try:
-        result = receive(args.state, args.id, args.attempt_id, args.source)
+        if args.prepare_download and args.source:
+            raise ValueError('--prepare-download 与 --source 不同时使用')
+        result = (prepare_download(args.state, args.id, args.attempt_id) if args.prepare_download
+                  else receive(args.state, args.id, args.attempt_id, args.source))
         emit(result)
         return 0 if result['ok'] else 2
     except Exception as exc:

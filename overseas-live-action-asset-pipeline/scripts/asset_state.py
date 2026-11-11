@@ -152,6 +152,8 @@ def request_signature(request):
         "asset_requests", "asset_types", "min_short_side", "resolved_assets")}
     if request.get("asset_workflow") == "jumeng" and request.get("jumeng_project_name"):
         values["jumeng_project_name"] = request["jumeng_project_name"]
+    if request.get("asset_workflow") == "jumeng" and request.get("jumeng_operation_mode"):
+        values["jumeng_operation_mode"] = request["jumeng_operation_mode"]
     return object_hash(values)
 
 
@@ -182,6 +184,8 @@ def next_action(state, item):
         if state["asset_workflow"] == "jumeng":
             if not state.get("jumeng_project_name"):
                 return "choose_jumeng_project"
+            if state.get("jumeng_operation_mode") not in {"web", "cli"}:
+                return "choose_jumeng_operation_mode"
     references = references_current(state, item)
     if references is None:
         return "wait_for_reference"
@@ -300,6 +304,7 @@ def initialize(state_path, request_path, plan_path, partial=False):
         state = {"schema_version": 2, "revision": old["revision"] + 1,
                  "asset_workflow": request["asset_workflow"],
                  "jumeng_project_name": request.get("jumeng_project_name"),
+                 "jumeng_operation_mode": request.get("jumeng_operation_mode"),
                  "region_mode": request["region_mode"],
                  "script_sha256": request["script_sha256"], "request_path": str(Path(request_path).resolve()),
                  "output_root": request["output_root"], "save_assets": request["save_assets"],
@@ -386,9 +391,9 @@ def record_event(state_path, event):
                 raise ValueError("先完成提示词，且不能在生成途中更改检查结论")
             item["preflight"] = checked_preflight(event.get("checks"), item["design_hash"])
         elif operation == "generating":
-            supported = state.get("asset_workflow") == "codex" or (state.get("asset_workflow") == "jumeng" and state.get("jumeng_project_name"))
+            supported = state.get("asset_workflow") == "codex" or (state.get("asset_workflow") == "jumeng" and state.get("jumeng_project_name") and state.get("jumeng_operation_mode") in {"web", "cli"})
             if not supported:
-                raise ValueError("出图前须确定流程并填写剧梦项目名")
+                raise ValueError("出图前须确定流程、填写剧梦项目名并选择网页或 Dreama CLI 操作模式")
             if action not in {"generate", "retry_generation"}:
                 raise ValueError("本项不能重新提交生成，当前动作：" + action)
             if not isinstance(event.get("handle"), str) or not event["handle"].strip():
@@ -407,6 +412,8 @@ def record_event(state_path, event):
                        "prompt": item["prompt"], "tool_prompt": tool_prompt, "design_hash": item["design_hash"],
                        "references": actual_references, "preflight": deepcopy(item["preflight"]),
                        "start_fingerprint": fingerprint, "outcomes": {}}
+            if state["asset_workflow"] == "jumeng":
+                attempt["jumeng_operation_mode"] = state["jumeng_operation_mode"]
             item.setdefault("attempts", []).append(attempt)
             item["current_attempt_id"] = attempt_id
             item["generation"] = {"handle": event["handle"], "attempt_id": attempt_id, "started_at": occurred_at}
@@ -593,22 +600,31 @@ def record_events(state_path, events):
 
 
 @io_operation
-def snapshot(state_path, actions=None, limit=None, include_prompt=False, summarize=True):
+def snapshot(state_path, actions=None, limit=None, include_prompt=False, summarize=True, lanes=False):
     state = read_json(state_path)
     require_current_request(state)
     if limit is not None and limit <= 0:
         raise ValueError("limit 必须为正整数")
     records, counts = [], Counter()
+    lane_actions = {'generate': {'generate', 'retry_generation'}, 'postprocess': {'inspect', 'save', 'deliver'}}
+    lane_records = {key: [] for key in lane_actions}
+    if lanes and (actions or include_prompt):
+        raise ValueError('--lanes 不与 --actions 或 --include-prompt 同用；仅实际提交项另取提示词')
     scanned = 0
     for key, item in state["assets"].items():
-        if not summarize and limit is not None and len(records) >= limit:
-            break
+        if not summarize and limit is not None:
+            if (all(len(values) >= limit for values in lane_records.values()) if lanes else len(records) >= limit):
+                break
         scanned += 1
         action = next_action(state, item)
         counts[action] += 1
         if actions and action not in actions:
             continue
-        if limit is not None and len(records) >= limit:
+        lane = next((key for key, values in lane_actions.items() if action in values), None) if lanes else None
+        if lanes:
+            if lane is None or (limit is not None and len(lane_records[lane]) >= limit):
+                continue
+        elif limit is not None and len(records) >= limit:
             continue
         entry = {"id": key, "name": item["name"], "kind": item["kind"], "action": action,
                  "source_path": image_source(item), "handle": item.get("generation", {}).get("handle"),
@@ -618,7 +634,11 @@ def snapshot(state_path, actions=None, limit=None, include_prompt=False, summari
             entry["reference_ids"] = item["reference_ids"]
             entry["reference_paths"] = ([r["path"] for r in item["reference_paths"]] +
                 [reference_source(state, state["assets"][ref]) for ref in item["reference_ids"]])
-        records.append(entry)
+        (lane_records[lane] if lanes else records).append(entry)
+    if lanes:
+        return {"ok": True, "revision": state["revision"], "queues": lane_records, "counts": dict(counts),
+                "counts_complete": scanned == len(state['assets']), "scanned_assets": scanned,
+                "note": "每队列独立限额；未返回不等于不存在，平台在途沿用实际句柄映射"}
     return {"ok": True, "revision": state["revision"], "counts": dict(counts), "assets": records,
             "counts_complete": scanned == len(state['assets']), "scanned_assets": scanned}
 
@@ -638,6 +658,7 @@ def main():
     next_parser = commands.add_parser("next")
     next_parser.add_argument("state")
     next_parser.add_argument("--actions", nargs="+")
+    next_parser.add_argument("--lanes", action="store_true", help="Return separate generation and postprocess queues in one snapshot")
     next_parser.add_argument("--limit", type=int)
     next_parser.add_argument("--include-prompt", action="store_true")
     next_parser.add_argument("--no-summary", action="store_true",
@@ -657,7 +678,7 @@ def main():
             result = metrics(args.state)
         else:
             result = snapshot(args.state, actions=args.actions, limit=args.limit, include_prompt=args.include_prompt,
-                              summarize=not args.no_summary)
+                              summarize=not args.no_summary, lanes=args.lanes)
         emit(result)
         return 0 if result["ok"] else 2
     except Exception as exc:

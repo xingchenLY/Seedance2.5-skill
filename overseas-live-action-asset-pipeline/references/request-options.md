@@ -8,9 +8,15 @@ asset_workflow 仅选择图片生成方式，Codex/codex/Codex流程 归一为 c
 
 先完成所选表格；需要出图且未明确选择平台时默认 jumeng，不询问 Codex／剧梦二选一。明确 Codex 时沿用。仅表格或提示词保持 null，不打开平台；明确仅图片不强加表格。
 
-选择剧梦不阻塞表格、索引、检查或保存；选择后必须提供 jumeng_project_name，再按 [剧梦流程](jumeng-workflow.md) 准备浏览器、项目与资产剧集；按剧梦完整流程继续人物、三视图、群像、场景及道具。缺项目名只阻止平台准备，不阻塞共用表格或已有图片后处理。两条出图流程的地区、题材、资产范围及后续存储共用。input_check 的 ready_for_generation 只表示正文与已导入的出图选择具备条件；调用者仍须先完成所选表格和逐图检查，不以该值证明 Excel 已保存。
+选择剧梦不阻塞表格、索引、检查或保存；选择后必须提供 jumeng_project_name，并明确 jumeng_operation_mode（web／cli，无默认），再按 [剧梦流程](jumeng-workflow.md) 的对应通道准备项目与资产剧集；按剧梦完整流程继续人物、三视图、群像、场景及道具。缺项目名或操作模式只阻止平台准备和新生成，不阻塞共用表格或已有图片后处理。两条出图流程的地区、题材、资产范围及后续存储共用。input_check 的 ready_for_generation 只表示正文与已导入的出图选择具备条件；调用者仍须先完成所选表格和逐图检查，不以该值证明 Excel 已保存。
 
-jumeng_project_required 表示剧梦图片任务缺少项目名，应询问后再操作网页；ready_for_jumeng_setup 表示已具备项目准备的输入，jumeng_episode_names 按已解析、启用图片的实际类别给出人物资产／场景资产／道具资产（含三视图时归人物资产）。这些是归一结果，不是用户必须手填字段；不代表页面或剧集已创建。ready_for_generation 对 Codex 或项目名齐备的剧梦图片请求开放，逐项仍受正文、提示词、参考依赖和审核门槛约束。
+jumeng_project_required 表示剧梦图片任务缺少项目名，jumeng_operation_mode_required 表示缺少网页／CLI 操作模式；合并询问后再操作平台；ready_for_jumeng_setup 表示已具备项目准备的输入，jumeng_episode_names 按已解析、启用图片的实际类别给出人物资产／场景资产／道具资产（含三视图时归人物资产）。这些是归一结果，不是用户必须手填字段；不代表页面或剧集已创建。ready_for_generation 对 Codex 或项目名与操作模式齐备的剧梦图片请求开放，逐项仍受正文、提示词、参考依赖和审核门槛约束。
+
+### 剧梦操作模式
+
+`jumeng_operation_mode` 接受网页／网页操作／web，以及 Dreama CLI／剧梦CLI／剧梦Dreama CLI／cli，归一为 web 或 cli。省略、null、空白保留 null，不自动选择；未知值、布尔值、同时选两种报错。新剧梦图片任务必须等待用户选择，同任务已明确则沿用；旧记录缺字段先补选。新任务不能从上次模式推断。仅表格、提示词或 Codex 不要求此字段。
+
+网页执行原流程，CLI 执行 [Dreama CLI 流程](jumeng-cli-workflow.md)，仅其能力缺口由网页补齐。模式写入请求、状态与每次剧梦生成尝试；切换先对账在途，再 init，保留设计、审核成果和返修预算，不重做表格。未选模式不会阻止已有结果的接收、审核与保存；只拦截新的平台准备和生图。脚本只验证选择，不自动启动 CLI 或浏览器。
 
 ## 必选地域模式
 
@@ -56,6 +62,7 @@ prompts 在对话交付完整提示词，不创建资产归档目录。workbook 
 | 字段 | 规则 |
 | --- | --- |
 | asset_workflow | 图片任务缺省为 jumeng，明确 Codex 优先；仅表格允许 null；剧梦须用户指定项目名 |
+| jumeng_operation_mode | 剧梦图片任务必选 web／cli，无默认；用户选择网页或 Dreama CLI 后写入，同任务续跑沿用；其余输出不要求 |
 | jumeng_project_name | 剧梦图片模式进入平台前必填，用户指定的非空单行项目名；同任务沿用，不从剧名／目录推断；仅表格、仅提示词和 Codex 不要求 |
 | region_mode | 必选国内/domestic 或海外/overseas，无默认；先选择后制作，当前任务续跑沿用 |
 | script_path / script_text | 必须且只能选一个；文件用可读取、非空的绝对路径，正文用非空文本。链接先取得正文，附件先定位真实文件 |

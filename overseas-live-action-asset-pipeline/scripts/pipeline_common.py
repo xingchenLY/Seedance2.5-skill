@@ -8,6 +8,7 @@ import tempfile
 from contextlib import contextmanager
 from contextvars import ContextVar
 from functools import wraps
+from copy import deepcopy
 
 
 _IO_SESSION = ContextVar('asset_pipeline_io_session', default=None)
@@ -45,7 +46,18 @@ def file_stamp(path):
 
 
 def read_json(path):
-    return json.loads(Path(path).read_text(encoding="utf-8-sig"))
+    path = Path(path).resolve()
+    before = file_stamp(path)
+    cache = operation_cache('json')
+    key = str(path)
+    if cache is not None and cache.get(key, (None,))[0] == before:
+        return deepcopy(cache[key][1])
+    value = json.loads(path.read_text(encoding="utf-8-sig"))
+    if file_stamp(path) != before:
+        raise ValueError('JSON 文件在读取期间发生变化')
+    if cache is not None:
+        cache[key] = (before, deepcopy(value))
+    return value
 
 
 def hash_bytes(data):

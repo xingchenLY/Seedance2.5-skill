@@ -66,6 +66,7 @@ state.json 留在工作区，每次事件原子写入并增加 revision；由一
 | text_only | 本项图片未开启，仍按表格范围补齐提示词；不调用图片工具、不计入未完成图片 |
 | choose_image_workflow | 兼容旧状态：图片请求补默认 jumeng 后重新 init，保留原成果；缺项目名再询问 |
 | choose_jumeng_project | 询问并记录必填 jumeng_project_name，重新 init；不阻塞表格和已有图片后处理 |
+| choose_jumeng_operation_mode | 询问网页或 Dreama CLI；写入请求并 init 后继续，不自动默认、不影响已返回图片后处理 |
 | generate / retry_generation | 剧梦检查当前分镜槽位、依赖及返修预算后提交一次独立出图；审核和保存积压不阻断提交 |
 | wait | 用现有句柄接收结果；等待超时不重发 |
 | wait_for_reference | 先完成／定位引用图；文件哈希改变时重新 init 核对设计 |
@@ -114,13 +115,17 @@ checked 几何检查失败时保留源图，记录 failed 的 quality 错误以�
 
 场景还须按 [空间区分与防重复](visual-specs.md#空间区分与防重复) 对照关联参考及同地点其它空间的实际图片，在现有 `checked.note` 记录对照资产 ID／参考来源、已继承的可见建筑细节与连接关系、目标空间的可见区别；无参考的首张只记录自身设计落实情况，不虚构跨图检查。不同空间出现相同画面或缺少可辨认区分点时，用 `approved=false`、`code=scene_space_not_distinct`；延伸图破坏已确定的建筑细节或可见衔接关系时，用 `code=scene_connection_mismatch` 并拒绝批准。记录具体原因，更新该空间完整提示词及引用后返修，沿用同项连续六次质量失败的上限。同一房间昼夜版布局一致和跨空间保留共享结构属于连续性，不按跨房间重复处理；不新增脚本字段，不把尺寸或哈希检查说成空间视觉识别。
 
+同次场景审核还须执行 [布局、入口机位与无畸变检查](scene-layout-camera.md)：海外中式化布局／家具用 `scene_regional_style_mismatch`，室内入口机位或入口不可见用 `scene_entry_composition_mismatch`，透视／结构畸变用 `scene_geometry_distortion`，均记录 `approved=false` 与具体可见问题。前景、入口及主要家具须实际查看；同一尝试多种缺陷只计一次质量失败，不新增字段或额外返修预算。国内不适用海外中式风格排除，但机位、入口及几何要求相同。
+
 同次场景审核按 [影视光影检查](scene-lighting.md#出图检查与表格同步) 检查光源、投影、选用效果、关键布局可读性与关联空间光照连续性，结果并入现有 `checked.note`。明显不符时记录具体可见问题，以 `approved=false`、`code=scene_lighting_mismatch` 返修；不以术语数量为验收条件，不增加生成轮次、事件字段或质量失败预算，也不延迟返回结果的待审落盘。
 
 已启用拟人动物都市题材的资产，按 [动物题材逐项检查](animal-city.md#逐项检查与交付) 核对物种结构、毛色、服装、相对尺度和动画材质，替换下文仅适用于真人的面孔、族裔及皮肤年龄检查；社会年龄仍按该分支沿用既有映射。动物居民沿用人物任务，`single_person` 表示仅一名拟人角色，所选三视图照常依赖合格单角色原照。风格和核验依据写入现有 `preflight.continuity`／`checked.note`，不新增状态字段；有自然人要素时再执行对应肖像初筛，纯动物不得虚报已完成人脸识别或全球授权。所有保存、几何与失败预算规则继续适用。
 
 真人角色的原照、换装／状态图、群像和三视图在 `approved=true` 前须完成 [原创设计复核](character-originality.md)，在现有 `note` 中记录实际可见的五官设定与辨识点是否落实，不新增必填事件字段。原创设计未落实用 `approved=false`、`code=originality_design_mismatch`；脸部细节不足以检查用 `code=face_details_uncheckable`（真人三视图以左侧未打码特写作面部检查，右侧全身面部按模板打码不触发此失败码；另核对打码范围及自然腰线上下段比例），都沿用现有质量失败及返修上限。未检查不得批准，不以几何检查通过代替原创设计检查；记录不得声称识别了某位明星或已排除所有名人相似性。
 
-海外模式的人物生成前还须按 [人物面貌偏好](visual-specs.md#人物面貌偏好) 在已有 `preflight.continuity` 中落实默认非亚洲人物设计方向或本次明确指定，以及可核对的具体面部特征；群像逐人处理。出图后在现有 `checked.note` 记录五官设定及基准面容是否落实，具体设计明显偏离时沿用 `originality_design_mismatch` 和既有质量失败预算返修，不另建族裔识别事件，不根据参考图或生成图判定族裔或计算“亚洲概率”。
+所有人物还须完成 [不同角色外貌区分与校验](character-distinction.md)：在 `preflight.continuity` 写具体区分点；批准前实际对照本项目其它可用角色基准，在现有 `checked.note` 记录对照对象／版本及可见差异。不同角色同脸用 `approved=false, code=character_not_distinct`，同一角色派生图换脸用 `code=character_identity_drift`，面部不可判读沿用 `face_details_uncheckable`。并发反馈先补齐新增基准的对照再批准；详细索引和比较记录放工作区，不增加 state 事件字段，不把图像哈希检查说成自动人脸校验。同次多个问题只算一次质量失败，沿用首次加最多 5 次返修；未通过不得入库或解锁派生。
+
+海外模式的人物生成前还须按 [人物面貌偏好](visual-specs.md#人物面貌偏好) 在已有 `preflight.continuity` 中落实按语种和明确地区确定的唯一人种／族裔设计、A 形象／C 服装编号，以及可核对的具体面部特征；详见 [地区选角规则](character-casting.md)；群像逐人处理。出图后在现有 `checked.note` 记录五官设定及基准面容是否落实，具体设计明显偏离时沿用 `originality_design_mismatch` 和既有质量失败预算返修，不另建族裔识别事件，不根据参考图或生成图判定族裔或计算“亚洲概率”。
 
 人物还须执行 [年龄范围检查](visual-specs.md#人物年龄范围)：生成前在已有 `preflight.body_basis` 记录正文年龄依据，在 `preflight.continuity` 核对“正文年龄 → 对应区间 → 确定外观年龄”；只按原始剧情年龄映射一次。未明确年龄时记录设计依据，同剧情时段的派生图沿用基准外观年龄。不得因正文为 30–50 岁或合法映射结果为 30–35 岁而按旧规则暂停。出图后在 `note` 记录大致年龄感是否符合最终外观设计，不能要求映射后的图恢复正文年龄感。明显不符用 `approved=false`、`code=appearance_age_mismatch`，无法观察用 `code=face_details_uncheckable`，沿用质量返修上限。该记录不是精确年龄测定，也不得填入未经执行的“名人相似度≤70%”结论。
 

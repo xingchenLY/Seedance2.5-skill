@@ -1,4 +1,4 @@
 interface:
   display_name: "资产自动化流程"
-  short_description: "整理保存资产表，出图默认剧梦；人物、场景和道具校验归档并保存项目资产"
-  default_prompt: "使用 $overseas-live-action-asset-pipeline 整理资产；需要出图时默认剧梦，人物默认跳过男女主和男女反，其余生成定妆照及三视图，完成校验、本地归档与项目保存。"
+  short_description: "整理保存资产表，剧梦必选网页或 Dreama CLI 操作，图片审核归档并保存项目资产"
+  default_prompt: "使用 $overseas-live-action-asset-pipeline 整理资产；需要出图时默认剧梦，先明确网页或 Dreama CLI 操作模式；人物默认跳过男女主和男女反，其余生成定妆照及三视图，完成校验、本地归档与项目保存。"
