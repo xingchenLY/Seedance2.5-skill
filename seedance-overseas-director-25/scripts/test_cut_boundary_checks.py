@@ -43,6 +43,16 @@ def boundary_sample(mode='推文'):
         narration.update(id='N2', source_id='L2', original_text='Please stop now.', source_ref='测试源文第2句')
         plan['narration_sources'].append(narration)
     plan['segments'].append(second)
+    if mode in ('推文', '3D漫推文'):
+        # Keep the camera-boundary test in the valid narrative segment window.
+        # Synthetic speech is lengthened, rather than adding silent padding.
+        for segment, source, narration, spoken in zip(plan['segments'], plan['sources'],
+                plan['narration_sources'], (
+                    'Put it down and leave it exactly where it is right now, please.',
+                    'Please stop filming me and put that phone down on the table.')):
+            segment['duration'] = segment['shots'][0]['end'] = 4
+            segment['speech'][0].update(text=spoken, start=0, end=4, estimated_seconds=4)
+            source['text'] = narration['original_text'] = spoken
     return plan
 
 
@@ -207,20 +217,20 @@ class CutBoundaryTests(unittest.TestCase):
 
     def test_playback_order_controls_predecessor_and_later_reverse_does_not_fix_opening(self):
         data = visible_change(boundary_sample())
-        data['playback'] = [dict(segment_id='S2', start=0, end=2), dict(segment_id='S1', start=0, end=2)]
+        data['playback'] = [dict(segment_id='S2', start=0, end=4), dict(segment_id='S1', start=0, end=4)]
         self.assert_finding(self.findings(data), 'record requires an adjacent cross-prompt cut')
         data = boundary_sample()
         after = data['segments'][1]
         reaction = deepcopy(after['shots'][0])
-        reaction.update(start=2, end=4, frame_id='分镜2', start_camera='north', end_camera='north')
+        reaction.update(start=4, end=6, frame_id='分镜2', start_camera='north', end_camera='north')
         reaction['view'].update(subject='伊森', foreground=['佐伊'], position='北端佐伊东侧肩后')
         after['shots'].append(reaction)
-        after['duration'] = 4
+        after['duration'] = 6
         self.assert_finding(self.findings(data), 'visible composition change evidence')
 
     def test_record_cannot_refer_to_unplayed_shot(self):
         data = visible_change(boundary_sample())
-        data['playback'] = [dict(segment_id='S1', start=0, end=2)]
+        data['playback'] = [dict(segment_id='S1', start=0, end=4)]
         errors = []
         boundary_context(data, errors, required=True)
         self.assert_finding(errors, 'outside playback')

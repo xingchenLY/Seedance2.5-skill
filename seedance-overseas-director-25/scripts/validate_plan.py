@@ -462,10 +462,11 @@ def validate_timing_preflight(plan):
     from shot_pacing import check_segment_duration
     errors = []
     from narrative_budget import check_narrative_budgets, NARRATIVE
-    if plan.get('mode') in NARRATIVE and any('narrative_budget' in s for s in plan.get('segments', [])):
+    if plan.get('mode') in NARRATIVE:
         errors.extend(check_narrative_budgets(plan, required=True))
         for item in plan['segments']:
-            check_segment_duration(item, item['id'], errors, required=True)
+            if 'duration' in item:
+                check_segment_duration(item, item['id'], errors, required=True)
         return errors
     overrides = require_object(plan.get('limits', {}), 'limits')
     if overrides:

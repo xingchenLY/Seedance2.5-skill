@@ -70,7 +70,7 @@ class WorkflowTests(unittest.TestCase):
         item = read_json(self.state_path)["assets"][identifier]
         self.assertEqual(len(item["attempts"]), 6)
         self.assertNotEqual(item["attempts"][0]["prompt"], item["attempts"][1]["prompt"])
-        self.event(identifier, "retry", note="Composition reduced and margins corrected")
+        self.event(identifier, "retry", note="User approved a new cycle after reviewing the correction", user_authorized=True)
         self.assertEqual(self.actions()[identifier], "retry_generation")
 
     def test_duplicate_events_and_start_do_not_create_extra_attempts(self):

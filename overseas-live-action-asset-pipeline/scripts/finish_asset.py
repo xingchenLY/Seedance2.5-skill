@@ -5,6 +5,7 @@ from pathlib import Path
 from asset_state import image_source, next_action, read_json, record_event, require_current_request
 from pipeline_common import emit, io_operation, file_hash
 from save_one_asset import save_one
+from cleanup_pending import cleanup_pending
 
 
 def asset_name(state, item):
@@ -55,24 +56,18 @@ def finish(state_path, identifier, attempt_id=None, review=None, name=None, disp
                 raise
         else:
             result = {"ok": True, "status": "reused", "target_path": item["saved"]["path"]}
-    # Jumeng already authorizes cleanup after durable, verified formal archive.
-    # A failed saved event never reaches here; both files remain recoverable.
     if state.get('asset_workflow') == 'jumeng' and state['save_assets']:
-        current = read_json(state_path)['assets'][identifier]
-        pending = current.get('pending')
-        saved = current.get('saved')
-        if pending and saved:
-            candidate = Path(pending['path']).resolve()
-            formal = Path(saved['path']).resolve()
-            pending_root = (Path(state['output_root']).resolve() / '待审').resolve()
-            try:
-                if (candidate != formal and candidate.is_relative_to(pending_root) and candidate.is_file()
-                        and file_hash(candidate) == saved['sha256'] == file_hash(formal)):
-                    candidate.unlink()
-                    result['pending_cleanup'] = 'removed_after_archive'
-            except (OSError, ValueError) as exc:
-                result['pending_cleanup'] = 'pending'
-                result['cleanup_error'] = str(exc)
+        try:
+            cleanup = cleanup_pending(state_path, identifier, include_history=False)
+        except (OSError, ValueError) as exc:
+            cleanup = {'removed': [], 'kept': [], 'errors': [{'reason': str(exc)}]}
+        if cleanup['removed']:
+            result['pending_cleanup'] = 'removed_after_archive'
+        elif cleanup['errors']:
+            result['pending_cleanup'] = 'pending'
+            result['cleanup_error'] = cleanup['errors'][0]['reason']
+        elif any(x['reason'] == 'protected_reference' for x in cleanup['kept']):
+            result['pending_cleanup'] = 'protected_reference'
     if displayed:
         record_event(state_path, {**base, "event": "delivered"})
     state = read_json(state_path)

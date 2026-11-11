@@ -1,4 +1,4 @@
-"""Lock narrative segment duration from speech before authoring shots.
+"""Lock 4-30s narrative budgets for already grouped continuous plot, before shots.
 
 This validates records and drift, not whether an author really listened to audio.
 """
@@ -13,6 +13,8 @@ from chinese_timing import chinese_speech_seconds, finite, leaves, word_rate_sec
 
 EPS = 1e-7
 NARRATIVE = {'推文', '3D漫推文'}
+MIN_SECONDS = 4
+MAX_SECONDS = 30
 
 
 def measured_seconds(voice):
@@ -88,12 +90,17 @@ def derive_budget(plan, segment):
         string(plan, 'limits_basis')
         for key in overrides:
             number(overrides, key, 0 if key == 'episode_seconds' else EPS)
-    max_seconds = overrides.get('segment_seconds', 30)
+    # Existing custom limits may tighten this window, never relax 4-30 seconds.
+    max_seconds = min(MAX_SECONDS, overrides.get('segment_seconds', MAX_SECONDS))
     max_words = overrides.get('english_words', 96)
     if int(max_words) != max_words:
         raise ValueError('english_words limit: expected an integer')
-    if duration < 1 or duration > max_seconds or words > max_words:
-        raise ValueError(f'speech budget exceeds {max_seconds} seconds / {max_words} English words or is empty; regroup before shots')
+    if duration < MIN_SECONDS:
+        raise ValueError(f'group speech budget rounds to {duration}s, below 4 seconds; '
+                         'regroup adjacent continuous plot before shots; do not pad to 4s')
+    if duration > max_seconds or words > max_words:
+        raise ValueError(f'group speech budget exceeds {max_seconds} seconds / {max_words} English words; '
+                         'regroup at natural plot boundaries before shots (required range 4-30 seconds)')
     if any(p['end'] > duration + EPS for p in pauses):
         raise ValueError('speech pause exceeds the locked segment')
     fingerprint = hashlib.sha256(json.dumps(dict(voices=evidence, pauses=pauses),
@@ -111,9 +118,12 @@ def check_narrative_budgets(plan, required=False):
             if lock is not None:
                 errors.append(f'{label}: narrative_budget is only for the two narrative modes')
             continue
+        duration = segment.get('duration')
+        if duration is not None and (not finite(duration) or not MIN_SECONDS <= duration <= MAX_SECONDS):
+            errors.append(f'{label}: narrative segment must be within 4-30 seconds; regroup before shots')
         if lock is None:
             if required:
-                errors.append(f'{label}: narrative_budget required; calculate and lock speech before authoring shots')
+                errors.append(f'{label}: narrative_budget required; group continuous plot, then lock speech before shots')
             continue
         try:
             expected = derive_budget(plan, segment)

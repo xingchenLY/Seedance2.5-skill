@@ -196,10 +196,14 @@ def main():
     parser.add_argument('plan', type=Path)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--plan-output', type=Path, required=True)
+    parser.add_argument('--rhythm-output', type=Path, help='Optional internal shot overview; never included in the prompt')
     args = parser.parse_args()
     try:
-        if len({p.resolve() for p in (args.plan, args.output, args.plan_output)}) != 3:
-            raise ValueError('Input, rendered prompt and derived plan must use different paths')
+        paths = [args.plan, args.output, args.plan_output]
+        if args.rhythm_output is not None:
+            paths.append(args.rhythm_output)
+        if len({p.resolve() for p in paths}) != len(paths):
+            raise ValueError('Input, rendered prompt, derived plan and optional rhythm overview must use different paths')
         authored = json.loads(args.plan.read_text(encoding='utf-8-sig'))
         require_mode(authored)
         from narrative_budget import check_narrative_budgets
@@ -209,9 +213,14 @@ def main():
         from language_policy import require_content_language
         require_content_language(authored)
         plan, text = render_plan(authored)
+        if args.rhythm_output is not None:
+            from rhythm_overview import render_rhythm_overview
+            rhythm = render_rhythm_overview(plan)
         with args.output.open('w', encoding='utf-8', newline='\n') as prompt_file:
             prompt_file.write(text)
         args.plan_output.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        if args.rhythm_output is not None:
+            args.rhythm_output.write_text(rhythm, encoding='utf-8')
     except (OSError, UnicodeError, ValueError, KeyError, TypeError) as exc:
         parser.exit(2, f'RENDER FAILED: {exc}\n')
     print('RENDERED: deterministic checks passed; manual review and --final-prompt validation still required.')

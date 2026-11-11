@@ -321,7 +321,7 @@ class PipelineTests(unittest.TestCase):
             self.event(identifier, "generating", handle="existing-handle")
             self.event(identifier, "failed", stage="generation", terminal=True, code="service", message="unavailable")
         with self.assertRaises(ValueError): self.event(identifier, "retry")
-        self.event(identifier, "retry", note="Service recovery verified")
+        self.event(identifier, "retry", note="User approved another cycle after verified service recovery", user_authorized=True)
         self.assertEqual(self.actions()[identifier], "generate")
 
     def test_cli_build_index_with_turnaround_alias(self):

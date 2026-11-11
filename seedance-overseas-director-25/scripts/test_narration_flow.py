@@ -172,19 +172,23 @@ class NarrationFlowTests(unittest.TestCase):
                 render_plan(authored)
 
     def test_cross_segment_natural_clause_can_continue_without_added_silence(self):
-        authored = split_sample(left='She closed the door', right='before anyone could enter.')
+        authored = split_sample(left='After checking the dark hallway one more time, she closed the door',
+                                right='before anyone outside could follow her into the room and see him.')
         first = authored['segments'][0]
         second = deepcopy(first)
         second['id'] = 'S2'
         first['shots'] = first['shots'][:1]
         first['speech'] = first['speech'][:1]
+        first['shots'][0]['end'] = 4
+        first['speech'][0].update(end=4, estimated_seconds=4)
         second['shots'] = second['shots'][1:]
-        second['shots'][0].update(start=0, end=2, start_scale='近景', end_scale='近景')
+        second['shots'][0].update(start=0, end=4, start_scale='近景', end_scale='近景')
         second['speech'] = second['speech'][1:]
-        second['speech'][0].update(start=0, end=2, boundary_before=boundary('closed the door', 'before anyone'))
+        second['speech'][0].update(start=0, end=4, estimated_seconds=4,
+                                  boundary_before=boundary('closed the door', 'before anyone'))
         authored['segments'].append(second)
         self.assert_valid(authored)
-        second['speech'][0].update(start=.4, estimated_seconds=1.6)
+        second['speech'][0].update(start=.4, estimated_seconds=3.6)
         with self.assertRaisesRegex(ValueError, 'unexplained speech gap'):
             render_plan(authored)
 

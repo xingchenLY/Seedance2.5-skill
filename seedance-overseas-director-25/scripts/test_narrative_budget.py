@@ -54,9 +54,9 @@ class NarrativeBudgetTests(unittest.TestCase):
         self.assertEqual(s['duration'],29)
 
     def test_whole_total_not_individual_rounding(self):
-        p=sample('字'*7)
-        p['segments'][0]['speech']=[dict(source_id='v1',text='字') for _ in range(7)]
-        self.assertEqual(lock_plan(p)['segments'][0]['duration'],1)
+        p=sample('字'*25)
+        p['segments'][0]['speech']=[dict(source_id='v1',text='字'*5) for _ in range(5)]
+        self.assertEqual(lock_plan(p)['segments'][0]['duration'],4)
 
     def test_mixed_language_counts_each_part_once(self):
         p=sample('一二三四五六七 '+ 'word '*17,'mul')
@@ -64,11 +64,11 @@ class NarrativeBudgetTests(unittest.TestCase):
         self.assertEqual(lock_plan(p)['segments'][0]['duration'],6)
 
     def test_numbers_use_spoken_reading(self):
-        p=sample('付20元。')
+        p=sample('付20元。'+'字'*21)
         p['segments'][0]['speech'][0]['number_expansions']=[dict(start=1,end=3,spoken='二十')]
         s=lock_plan(p)['segments'][0]
-        self.assertAlmostEqual(s['pre_round_duration'],4/7)
-        self.assertEqual(s['duration'],1)
+        self.assertAlmostEqual(s['pre_round_duration'],25/7)
+        self.assertEqual(s['duration'],4)
 
     def test_spanish_and_portuguese_use_same_word_rate_as_english(self):
         for lang in ('en','es','pt','pt-BR','es-ES'):
@@ -86,11 +86,11 @@ class NarrativeBudgetTests(unittest.TestCase):
 
     def test_spanish_portuguese_numbers_expand_without_entering_english_cap(self):
         from validate_plan import speech_english_words
-        for lang,text,spoken in [('es','Tengo 20 euros.','veinte'),('pt','Tenho 20 euros.','vinte')]:
+        for lang,text,spoken in [('es','Tengo 20 euros. '+'texto '*10,'veinte'),('pt','Tenho 20 euros. '+'texto '*10,'vinte')]:
             p=sample(text,lang);voice=p['segments'][0]['speech'][0]
             with self.assertRaisesRegex(ValueError,'expand spoken numbers'):lock_plan(p)
             voice['number_expansions']=[dict(start=6,end=8,spoken=spoken)]
-            self.assertAlmostEqual(lock_plan(p)['segments'][0]['pre_round_duration'],3/3.4)
+            self.assertAlmostEqual(lock_plan(p)['segments'][0]['pre_round_duration'],13/3.4)
             errors=[]
             self.assertEqual(speech_english_words(voice,lang,'test',errors),0)
             self.assertEqual(errors,[])
@@ -108,11 +108,11 @@ class NarrativeBudgetTests(unittest.TestCase):
         self.assertEqual(lock_plan(p)['segments'][0]['duration'],13)
 
     def test_explicit_speech_pause_is_counted_once(self):
-        p=sample('字'*14)
-        p['segments'][0]['speech'][0].update(start=0,end=2)
-        p['segments'][0]['narrative_pauses']=[dict(start=2,end=2.4,basis='source requires this silence')]
+        p=sample('字'*28)
+        p['segments'][0]['speech'][0].update(start=0,end=4)
+        p['segments'][0]['narrative_pauses']=[dict(start=4,end=4.4,basis='source requires this silence')]
         result=lock_plan(p)
-        self.assertEqual(result['segments'][0]['duration'],3)
+        self.assertEqual(result['segments'][0]['duration'],5)
         p['segments'][0]['narrative_pauses'][0].update(start=1,end=1.4)
         with self.assertRaisesRegex(ValueError,'overlaps speech'):lock_plan(p)
 
@@ -127,13 +127,16 @@ class NarrativeBudgetTests(unittest.TestCase):
         p=sample();p['segments'][0]['speech']=[]
         with self.assertRaisesRegex(ValueError,'no speech'):lock_plan(p)
 
-    def test_existing_explicit_limit_overrides_remain_effective(self):
+    def test_existing_limit_overrides_can_tighten_but_not_relax_range(self):
         p=sample();p['limits']=dict(segment_seconds=10)
         with self.assertRaises((ValueError,KeyError)):lock_plan(p)
         p['limits_basis']='synthetic explicit user limit'
         with self.assertRaisesRegex(ValueError,'regroup'):lock_plan(p)
         p=sample('字'*217);p.update(limits=dict(segment_seconds=32),limits_basis='synthetic explicit user limit')
-        self.assertEqual(lock_plan(p)['segments'][0]['duration'],31)
+        with self.assertRaisesRegex(ValueError,'4-30'):lock_plan(p)
+        p['sources'][0]['text']='字'*210
+        p['segments'][0]['speech'][0]['text']='字'*210
+        self.assertEqual(lock_plan(p)['segments'][0]['duration'],30)
 
     def test_no_in_place_mutation_and_no_post_shot_lock(self):
         p=sample();before=deepcopy(p);result=lock_plan(p)
@@ -176,10 +179,80 @@ class NarrativeBudgetTests(unittest.TestCase):
         self.assertTrue(check_narrative_budgets(p,True))
 
     def test_minimum_visual_time_cannot_enlarge_locked_duration(self):
-        p=lock_plan(sample('字'*14))
+        p=lock_plan(sample('字'*28))
         p['segments'][0]['timing_feasibility']=dict(minimum_seconds=5,basis='irreducible original action')
         self.assertTrue(any('infeasible' in e for e in validate_timing_preflight(p)))
-        self.assertEqual(p['segments'][0]['duration'],2)
+        self.assertEqual(p['segments'][0]['duration'],4)
+
+    def test_four_to_thirty_second_boundaries_in_both_narrative_modes(self):
+        for mode in ('推文','3D漫推文'):
+            for count,expected in ((22,4),(28,4),(210,30)):
+                self.assertEqual(lock_plan(sample('字'*count,mode=mode))['segments'][0]['duration'],expected)
+            for count in (1,21,211):
+                p=sample('字'*count,mode=mode);before=deepcopy(p)
+                with self.assertRaisesRegex(ValueError,'regroup'):lock_plan(p)
+                self.assertEqual(p,before)
+
+    def test_short_fragments_can_be_grouped_without_individual_duration_padding(self):
+        text='她打开门看见桌上放着一封信。她拿起信封发现没有署名。'
+        p=sample(text)
+        p['segments'][0]['speech']=[dict(source_id='v1',text=part)
+                                   for part in ('她打开门看见桌上放着一封信。','她拿起信封发现没有署名。')]
+        result=lock_plan(p)
+        self.assertEqual(result['segments'][0]['duration'],4)
+        self.assertEqual(result['sources'],p['sources'])
+        self.assertEqual(result['segments'][0]['speech'],p['segments'][0]['speech'])
+
+    def test_old_out_of_range_records_and_missing_locks_are_rejected(self):
+        for duration in (3,31):
+            p=sample();p['segments'][0]['duration']=duration
+            self.assertTrue(any('4-30' in e for e in check_narrative_budgets(p)))
+            self.assertTrue(any('4-30' in e for e in validate_timing_preflight(p)))
+        self.assertTrue(any('narrative_budget required' in e for e in validate_timing_preflight(sample())))
+
+    def test_short_shots_remain_allowed_inside_valid_segment(self):
+        p=lock_plan(sample('字'*28))
+        p['segments'][0]['shots']=[dict(start=i,end=i+1) for i in range(4)]
+        self.assertEqual(check_narrative_budgets(p,True),[])
+
+    def test_word_rate_boundary_does_not_round_short_groups_up_to_four(self):
+        for language in ('en','es','pt'):
+            with self.assertRaisesRegex(ValueError,'below 4'):lock_plan(sample('texto '*10,language))
+            self.assertEqual(lock_plan(sample('texto '*11,language))['segments'][0]['duration'],4)
+
+    def test_full_validation_and_delivery_reject_out_of_range_old_records(self):
+        from test_modes import mode_sample
+        from render_prompt import render_plan
+        from validate_plan import validate
+        from delivery_checks import validate_delivery
+        for mode in ('推文','3D漫推文'):
+            plan,text=render_plan(mode_sample(mode))
+            for duration in (3,31):
+                broken=deepcopy(plan);broken['segments'][0]['duration']=duration
+                self.assertTrue(any('4-30' in e for e in validate(broken)))
+                self.assertTrue(any('4-30' in e for e in validate_delivery(broken,text,require_review=False)))
+
+    def test_public_cli_rejects_short_group_and_tampered_segment_without_output(self):
+        root=Path(__file__).resolve().parent
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder);src=path/'input.json';out=path/'locked.json'
+            call=lambda *args:subprocess.run([sys.executable,'-B','-X','utf8',*map(str,args)],
+                capture_output=True,text=True,encoding='utf-8')
+            src.write_text(json.dumps(sample('字'*21),ensure_ascii=False),encoding='utf-8')
+            result=call(root/'narrative_budget.py',src,'--output',out)
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn('below 4',result.stderr)
+            self.assertFalse(out.exists())
+            for duration in (3,31):
+                plan=lock_plan(sample());plan['segments'][0]['duration']=duration
+                src.write_text(json.dumps(plan,ensure_ascii=False),encoding='utf-8')
+                result=call(root/'validate_plan.py',src,'--timing-only')
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn('4-30',result.stdout+result.stderr)
+                result=call(root/'render_prompt.py',src,'--output',path/'prompt.txt','--plan-output',path/'plan.json')
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn('4-30',result.stdout+result.stderr)
+                self.assertFalse((path/'prompt.txt').exists())
 
     def test_real_cli_and_timing_only_preflight(self):
         root=Path(__file__).resolve().parent

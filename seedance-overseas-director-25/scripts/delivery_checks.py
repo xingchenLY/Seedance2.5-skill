@@ -256,6 +256,8 @@ def visual_intervals(value, shots, label, errors):
 def validate_delivery(plan, text, *, require_review=True):
     """Bind numeric/cast/speech/frame records to the exact reviewed final text."""
     errors = []
+    from narrative_budget import check_narrative_budgets
+    errors.extend(check_narrative_budgets(plan))
     validate_visual_plan(plan, errors, required=True)
     narration_coverage = check_final_narration_editing(plan, errors)
     reactions = check_dialogue_coverage(plan, errors)

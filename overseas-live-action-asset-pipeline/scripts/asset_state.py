@@ -117,11 +117,44 @@ def copy_timing(event):
     return dict(value)
 
 
+def accepted_reference_snapshot(item, reference):
+    """A missing immutable input does not invalidate a verified archived result."""
+    attempt = current_attempt(item)
+    saved = item.get("saved", {})
+    return bool(attempt and item.get("accepted_attempt_id") == attempt["id"]
+                and attempt.get("design_hash") == item.get("design_hash")
+                and attempt.get("review", {}).get("approved") is True
+                and item.get("review", {}).get("approved") is True
+                and item["review"].get("sha256") == saved.get("sha256")
+                and verified_file(saved)
+                and any(r.get("path") == reference["path"] and r.get("sha256") == reference["sha256"]
+                        for r in attempt.get("references", [])))
+
+
+def repair_failure_count(item, ignore_attempt=None):
+    """Generation and visual rejection share one budget; save failures do not."""
+    start = item.get("retry_checkpoint", {}).get("attempt_count", 0)
+    failed = set()
+    for attempt in reversed(item.get("attempts", [])[start:]):
+        if attempt.get("review", {}).get("approved") is True:
+            break
+        if attempt.get("id") == ignore_attempt:
+            continue
+        if (set(attempt.get("failures", {})) & {"generation", "quality"}
+                or attempt.get("review", {}).get("approved") is False):
+            failed.add(attempt["id"])
+    legacy = item.get("failure", {})
+    legacy_count = legacy.get("count", 0) if legacy.get("stage") in {"generation", "quality"} else 0
+    return max(len(failed), item.get("repair_failures", 0), legacy_count)
+
+
 def references_current(state, item):
     values = []
     for reference in item["reference_paths"]:
         if not verified_file(reference):
-            return None
+            # Changed files and live reference_ids still require reconciliation.
+            if Path(reference["path"]).exists() or not accepted_reference_snapshot(item, reference):
+                return None
         values.append(reference["sha256"])
     for identifier in item["reference_ids"]:
         parent = state["assets"][identifier]
@@ -191,8 +224,9 @@ def next_action(state, item):
         return "wait_for_reference"
     if item.get("used_reference_hashes") is not None and item["used_reference_hashes"] != references:
         return "replan_references"
-    failure = item.get("failure", {})
-    if failure.get("stage") in {"generation", "quality"} and failure.get("count", 0) >= 6:  # Initial attempt plus five regeneration retries.
+    # Existing paid results can still be inspected/archived after migration.
+    # Only another generation is blocked after the initial attempt + 5 repairs.
+    if repair_failure_count(item) >= 6 and (not source or item.get("review", {}).get("approved") is False):
         return "paused"
     if source and item.get("review", {}).get("approved") is False:
         return "retry_generation" if ready_preflight(item) else "preflight"
@@ -259,13 +293,24 @@ def initialize(state_path, request_path, plan_path, partial=False):
                 raise ValueError("每个计划条目须有完整提示词")
             reference_ids = list(dict.fromkeys(entry.get("reference_ids", []) + ([scope["parent_id"]] if scope["parent_id"] else [])))
             reference_paths = []
+            missing_archived_reference = False
             for raw_path in entry.get("reference_paths", []):
                 reference = Path(raw_path).expanduser()
-                if not reference.is_absolute() or not reference.is_file():
+                if not reference.is_absolute():
                     raise ValueError("参考图路径必须绝对且可读取")
-                reference_paths.append({"path": str(reference.resolve()), "sha256": file_hash(reference)})
+                if not reference.is_file():
+                    previous = next((r for r in (prior or {}).get("reference_paths", [])
+                                     if r["path"] == str(reference.resolve())), None)
+                    if reference.exists() or not previous or not accepted_reference_snapshot(prior, previous):
+                        raise ValueError("参考图路径必须绝对且可读取")
+                    reference_paths.append(dict(previous))
+                    missing_archived_reference = True
+                else:
+                    reference_paths.append({"path": str(reference.resolve()), "sha256": file_hash(reference)})
             design_hash = design_fingerprint(prompt, scope["kind"], scope["variant"], request["min_short_side"],
                                              reference_ids, reference_paths, request["region_mode"])
+            if missing_archived_reference and prior["design_hash"] != design_hash:
+                raise ValueError("新设计需要的参考图已缺失；恢复真实文件后才能重新生成")
             if prior and prior["design_hash"] == design_hash:
                 item = dict(prior)
             else:
@@ -274,6 +319,10 @@ def initialize(state_path, request_path, plan_path, partial=False):
                 item = {"events": deepcopy(prior.get("events", [])) if prior else [],
                         "attempts": deepcopy(prior.get("attempts", [])) if prior else [],
                         "created_at": prior.get("created_at", now()) if prior else now()}
+                if prior:
+                    item["repair_failures"] = repair_failure_count(prior)
+                    if "retry_checkpoint" in prior:
+                        item["retry_checkpoint"] = deepcopy(prior["retry_checkpoint"])
                 # A prompt repair must not erase the retry budget or prior evidence.
                 if prior and prior.get("failure", {}).get("stage") in {"generation", "quality"}:
                     item["failure"] = deepcopy(prior["failure"])
@@ -463,6 +512,7 @@ def record_event(state_path, event):
                                   "sha256": dimensions["sha256"], "width": dimensions["width"], "height": dimensions["height"],
                                   "aspect_ratio": dimensions["aspect_ratio"]}
                 item.pop("failure", None)
+                item["repair_failures"] = 0
                 if attempt:
                     item["accepted_attempt_id"] = attempt["id"]
                     attempt['geometry_seconds'] = geometry_seconds
@@ -499,6 +549,11 @@ def record_event(state_path, event):
         elif operation == "retry":
             if action != "paused" or not isinstance(event.get("note"), str) or not event["note"].strip():
                 raise ValueError("仅暂停项可恢复；须记录已修正的问题或明确重试依据")
+            if event.get("user_authorized") is not True:
+                raise ValueError("累计返修预算已用尽；须用户明确授权新一轮，不能自动清零")
+            item["retry_checkpoint"] = {"attempt_count": len(item.get("attempts", [])),
+                                        "at": occurred_at, "note": event["note"].strip()}
+            item["repair_failures"] = 0
             item.pop("failure", None)
         elif operation == "failed":
             stage = event.get("stage")
@@ -539,7 +594,13 @@ def add_failure(item, stage, code, message):
         raise ValueError("失败记录须有错误代码和原因")
     old = item.get("failure", {})
     attempt = current_attempt(item)
-    # One quality failure per returned image, even checked(false) + failed(quality).
+    production = stage in {"generation", "quality"}
+    identity = item.get("current_attempt_id") or item.get("source", {}).get("sha256")
+    already_counted = bool((attempt and set(attempt.get("failures", {})) & {"generation", "quality"})
+                           or (identity and old.get("attempt_id") == identity
+                               and old.get("stage") in {"generation", "quality"}))
+    previous_count = repair_failure_count(item, ignore_attempt=identity) if production else 0
+    # One failure per attempt across both production stages, not per error code.
     if attempt:
         failures = attempt.setdefault("failures", {})
         if stage in failures:
@@ -548,7 +609,11 @@ def add_failure(item, stage, code, message):
     identity = item.get("current_attempt_id") or item.get("source", {}).get("sha256")
     if identity and old.get("attempt_id") == identity and old.get("stage") == stage:
         return
-    count = old.get("count", 0) + 1 if old.get("stage") == stage else 1
+    if production:
+        count = previous_count + (0 if already_counted else 1)
+        item["repair_failures"] = count
+    else:
+        count = old.get("count", 0) + 1 if old.get("stage") == stage else 1
     item["failure"] = {"stage": stage, "code": code, "message": message, "count": count,
                        "attempt_id": identity}
 
