@@ -26,10 +26,10 @@ def rich_plan(mode='3D漫推文'):
     segment['speech'][0].update(text=text, start=0, end=10, estimated_seconds=10)
     segment['duration'] = 10
     shots = segment['shots']
-    shots.append(deepcopy(shots[0]))
-    for i, (shot, start, end, scale) in enumerate(zip(shots, (0, 3, 6), (3, 6, 10), ('中景', '中近景', '近景'))):
+    shots.extend([deepcopy(shots[0]), deepcopy(shots[1])])
+    for i, (shot, start, end, scale) in enumerate(zip(shots, (0, 2.5, 5, 7.5), (2.5, 5, 7.5, 10), ('中景', '中近景', '近景', '中景'))):
         shot.update(start=start, end=end, frame_id=f'分镜{i+1}', start_scale=scale, end_scale=scale,
-                    visual_text=VISUALS[i])
+                    visual_text=VISUALS[i] if i < 3 else 'Elias的花束停在两人之间，Mara仍未伸手接花。')
     shots[0]['camera_text'] += '画框保留Mara双手与身侧的相对位置。'
     shots[1]['camera_text'] += '花束及Elias双手持物均可见。'
     shots[2]['relation']['placements'][0]['placement'] = '在画面右后方，面向Elias，视线转向他左手的手机'
@@ -37,7 +37,7 @@ def rich_plan(mode='3D漫推文'):
         dict(source_id=data['sources'][0]['id'], text=clause, task=task, focus=focus,
              views=[dict(shot_start=start, evidence=visual)])
         for clause, task, focus, start, visual in zip(CLAUSES, ('reaction', 'action', 'reaction'),
-            ('Mara没有接花的手位', 'Elias递花及手机归属', 'Mara注意对象转向手机'), (0, 3, 6), VISUALS)]
+            ('Mara没有接花的手位', 'Elias递花及手机归属', 'Mara注意对象转向手机'), (0, 2.5, 5), VISUALS)]
     return data
 
 
@@ -169,24 +169,26 @@ class NarrationCoverageTests(unittest.TestCase):
 
     def test_legitimate_long_take_still_preserves_original_audio(self):
         data = long_plan()
-        plan, text = render_plan(data)
-        self.assertEqual(plan['segments'][0]['speech'], data['segments'][0]['speech'])
-        self.assertEqual(len(plan['segments'][0]['shots']), 1)
-        self.assertNotIn('loss_if_cut', text)
-        self.assertEqual(validate_delivery(plan, text, require_review=False), [])
+        before = deepcopy(data['segments'][0]['speech'])
+        with self.assertRaisesRegex(ValueError, 'strictly < 3'):
+            render_plan(data)
+        self.assertEqual(data['segments'][0]['speech'], before)
 
     def test_final_long_shot_check_does_not_depend_on_prior_plan_pass(self):
-        plan, text = render_plan(long_plan())
+        plan, text = render_plan(rich_plan())
+        plan['segments'][0]['shots'] = deepcopy(long_plan()['segments'][0]['shots'])
         plan['segments'][0]['shots'][0]['narration_visual']['long_take']['cut_review']['at'] = -1
-        self.assert_finding(validate_delivery(plan, text, require_review=False), 'alternative cut point')
+        errors = validate_delivery(plan, text, require_review=False)
+        self.assert_finding(errors, 'alternative cut point')
+        self.assert_finding(errors, 'strictly < 3')
 
     def test_six_second_whole_shot_is_not_an_automatic_error(self):
         data = long_plan(); segment = data['segments'][0]
         segment['shots'][0]['end'] = 6
         segment['speech'][0].update(end=6, estimated_seconds=6)
         del segment['shots'][0]['narration_visual']
-        plan, text = render_plan(data)
-        self.assertEqual(validate_delivery(plan, text, require_review=False), [])
+        with self.assertRaisesRegex(ValueError, 'strictly < 3'):
+            render_plan(data)
 
     def test_non_narration_modes_do_not_gain_coverage_records(self):
         for mode in ('真人剧', '3D漫真人剧'):

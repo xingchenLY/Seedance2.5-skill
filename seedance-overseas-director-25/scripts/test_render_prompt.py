@@ -138,6 +138,8 @@ class RenderTests(unittest.TestCase):
         memory['id'] = 'memory'
         for i, shot in enumerate(memory['shots']):
             shot.update(start_scale='近景', end_scale='近景', start_camera=f'memory-{i}', end_camera=f'memory-{i}')
+            shot['view']['position'] = ('长桌北端东侧' if i == 0 else '长桌东侧中部')
+            shot['view']['background'] = '回忆时点的大厅南墙'
         plan['segments'].append(memory)
         plan['events'] = [dict(id=name, episode='current', segment_id=sid, start=a, end=b, text=name)
                           for name, sid, a, b in [('A', 'S1', 0, 2), ('B', 'memory', 0, 4), ('C', 'S1', 2, 4)]]

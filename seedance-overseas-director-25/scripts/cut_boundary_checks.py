@@ -39,12 +39,21 @@ def concrete_evidence(value):
     return len(compact) >= 8
 
 
-def boundary_context(plan, errors, *, required=False):
+def boundary_context(plan, errors, *, required=False, tails=None):
     """Return validated evidence pairs in playback order; never fabricate evidence."""
     pairs = []
+    from continuation_boundary import previous_tails
+    if tails is None:
+        tails = previous_tails(plan, errors, required=required)
     previous = None
+    seen_episodes = set()
     visited = set()
     for segment, shot in playback_shots(plan):
+        if segment['episode'] not in seen_episodes:
+            seen_episodes.add(segment['episode'])
+            tail = tails.get(segment['episode'])
+            if tail:
+                previous = ({'id': tail['segment_id'], 'episode': segment['episode']}, tail['shot'])
         key = (segment['id'], shot['start'])
         visited.add(key)
         record = shot.get('cut_change_before')
@@ -110,6 +119,10 @@ def boundary_context(plan, errors, *, required=False):
 
 def check_boundary_binding(plan, intervals, errors):
     # Structural findings are already reported by validate_visual_plan.
+    from continuation_boundary import previous_tails
+    intervals = dict(intervals)
+    for tail in previous_tails(plan, [], required=True).values():
+        intervals[(tail['segment_id'], tail['shot']['start'])] = [tail['final_camera'], tail['final_visual']]
     pairs = boundary_context(plan, [], required=True)
     for before, after, record in pairs:
         for side, key in [('before', before), ('after', after)]:

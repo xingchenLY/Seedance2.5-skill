@@ -29,6 +29,7 @@ SCALES = {'远景', '全景', '中全景', '中景', '中近景', '近景', '面
 CONDITIONAL_CUTS = {('中近景', '中景'), ('中近景', '近景'), ('近景', '中近景'), ('中景', '中近景')}
 SHOT_FIELDS = ('frame_id', 'start_scale', 'end_scale', 'start_camera', 'end_camera', 'visible_characters')
 SUBJECT_FIELDS = ('start_subject', 'end_subject')
+PERSON_SCALES = {'远景', '全景', '中全景', '中景', '中近景', '近景', '面部特写'}
 RELATION_MODES = {'same_scene', 'remote', 'solo', 'insert', 'empty'}
 PREFIX_FIELDS = ['整体风格', '对话氛围', '画面规格', '声音限制', '画面限制', '场景', '环境光影', '出镜人物', '特殊道具', '人物位置关系']
 HEADER = re.compile(r'^第\s*\S+?\s*段｜预估时长\s*([0-9]+(?:\.[0-9]+)?)\s*秒｜发声词数\s*(\d+)\s*$', re.M)
@@ -75,6 +76,8 @@ def validate_visual_plan(plan, errors, required=False):
         check_segment_duration(segment, sid, errors, required=required)
         visible = set()
         for shot in segment['shots']:
+            from narration_editing import check_narrated_duration
+            check_narrated_duration(segment, shot, errors)
             check_shot_pacing(shot, f'{sid}/{shot["start"]}', errors, required=required)
             if 'jump_cut_before' in shot:
                 issue = jump_record_error(shot['jump_cut_before'])
@@ -150,11 +153,19 @@ def validate_visual_plan(plan, errors, required=False):
         return
     clips = plan.get('playback', [dict(segment_id=sid, start=0, end=s['duration'])
                                   for sid, s in segments.items()])
+    from continuation_boundary import previous_tails
+    tails = previous_tails(plan, errors, required=required)
+    seen_episodes = set()
     previous = None
     for clip in clips:
         segment = segments.get(clip['segment_id'])
         if segment is None:
             continue
+        if segment['episode'] not in seen_episodes:
+            seen_episodes.add(segment['episode'])
+            tail = tails.get(segment['episode'])
+            if tail:
+                previous = (segment['episode'], tail['shot'], tail['segment_id'])
         for shot in segment['shots']:
             if shot['start'] < clip['start'] - EPS or shot['end'] > clip['end'] + EPS:
                 continue
@@ -169,7 +180,9 @@ def validate_visual_plan(plan, errors, required=False):
                 changed_subject = (end_subject in before['visible_characters'] and
                                    start_subject in shot['visible_characters'] and
                                    end_subject != start_subject)
-                if required and (pair in CONDITIONAL_CUTS or pair[0] == pair[1]):
+                person_pair = pair[0] in PERSON_SCALES and pair[1] in PERSON_SCALES
+                same_subject = end_subject is not None and end_subject == start_subject
+                if required and (person_pair or pair in CONDITIONAL_CUTS or pair[0] == pair[1]):
                     left, right = endpoint_view(before, 'end'), endpoint_view(shot, 'start')
                     left_error = view_error(left, before['visible_characters'])
                     right_error = view_error(right, shot['visible_characters'])
@@ -178,9 +191,11 @@ def validate_visual_plan(plan, errors, required=False):
                                       f'{pair[0]} -> {pair[1]}; camera IDs alone cannot authorize it')
                     else:
                         same_camera = physical_key(left) == physical_key(right)
+                        same_subject = left['subject'] is not None and left['subject'] == right['subject']
                         changed_subject = (left['subject'] is not None and right['subject'] is not None
                                            and left['subject'] != right['subject'])
-                if pair in CONDITIONAL_CUTS and same_camera and not changed_subject and not jump_allowed:
+                if ((pair in CONDITIONAL_CUTS and not changed_subject) or
+                        (person_pair and same_subject)) and same_camera and not jump_allowed:
                     errors.append(f'{segment["id"]}: forbidden playback cut {pair[0]} -> {pair[1]}: '
                                   'same camera without a verified primary-character change')
                 if previous[2] != segment['id'] and pair[0] == pair[1]:
@@ -188,7 +203,7 @@ def validate_visual_plan(plan, errors, required=False):
                 if pair[0] == pair[1] and same_camera and not jump_allowed:
                     errors.append(f'{segment["id"]}: same scale and camera at adjacent playback cut')
             previous = (segment['episode'], shot, segment['id'])
-    boundary_context(plan, errors, required=required)
+    boundary_context(plan, errors, required=required, tails=tails)
 
 
 def field_rows(text):

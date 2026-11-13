@@ -197,12 +197,8 @@ class ModeTests(unittest.TestCase):
         segment['narration_coverage'] = [dict(source_id=data['sources'][0]['id'],
             text=segment['speech'][0]['text'], task='action', focus='合成原有行走与门把接触',
             views=[dict(shot_start=0, evidence='右手从身侧抬起握住原门把')])]
-        plan, text = render_plan(data)
-        review(plan, text)
-        self.assertEqual(validate_delivery(plan, text), [])
-        changed = text.replace('Mara走到门前停稳，右手从身侧抬起握住原门把', 'Mara保持表情不变')
-        review(plan, changed)
-        self.assertTrue(any('narration visual progression' in e for e in validate_delivery(plan, changed)))
+        with self.assertRaisesRegex(ValueError, 'strictly < 3'):
+            render_plan(data)
 
     def test_source_backed_cross_category_overlap_only_in_narrative(self):
         data = mode_sample()

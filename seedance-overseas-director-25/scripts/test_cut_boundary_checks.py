@@ -53,6 +53,15 @@ def boundary_sample(mode='推文'):
             segment['duration'] = segment['shots'][0]['end'] = 4
             segment['speech'][0].update(text=spoken, start=0, end=4, estimated_seconds=4)
             source['text'] = narration['original_text'] = spoken
+    if mode in ('推文', '3D漫推文'):
+        plan['narration_sources'] = []
+        plan['narration_absence_basis'] = '本合成机位案例仅包含人物现场对白，无叙事旁白。'
+        for source in plan['sources']:
+            source['kind'] = 'dialogue'
+        for segment in plan['segments']:
+            segment['speech'][0].update(kind='dialogue', performance='声音清楚，重读原句关键词')
+        plan['sources'][1]['speaker'] = 'Elias'
+        plan['segments'][1]['speech'][0]['speaker'] = 'Elias'
     return plan
 
 

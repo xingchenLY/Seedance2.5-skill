@@ -53,14 +53,23 @@ def canonical_text(value):
 
 def physical_key(view):
     # Camera labels, crop, focal length, foreground and background do not establish a move.
-    position = re.sub(r'([东南西北])边', r'\1侧', canonical_text(view['position']))
-    return (canonical_text(view['space']), position, canonical_text(view['height']))
+    def spatial(value):
+        value = canonical_text(value)
+        value = re.sub(r'([东南西北])边', r'\1侧', value)
+        value = re.sub(r'的(?=[东南西北左右前后])', '', value)
+        value = re.sub(r'眼睛高度|眼部高度|眼睛等高|眼部等高|眼高处', '眼高', value)
+        return value
+    return (canonical_text(view['space']), spatial(view['position']), spatial(view['height']))
 
 
 def view_sentence(view, *, style='compact'):
     subject = f'主拍{view["subject"]}' if view['subject'] is not None else '此构图无主拍人物'
     foreground = ('，' + '、'.join(view['foreground']) + '仅作前景关系参照') if view['foreground'] else ''
     if style == 'compact':
+        foreground = ('，前景' + '、'.join(view['foreground'])) if view['foreground'] else ''
+        return (f'{view["space"]}，{view["position"]}，朝{view["direction"]}，{view["height"]}；'
+                f'{subject}{foreground}，背景{view["background"]}。')
+    if style == 'expanded':
         foreground = ('，前景为' + '、'.join(view['foreground'])) if view['foreground'] else ''
         return (f'摄影机在{view["space"]}的{view["position"]}，朝向{view["direction"]}，高度为{view["height"]}；'
                 f'{subject}{foreground}，背景为{view["background"]}。')
@@ -78,6 +87,19 @@ def camera_view_prose(shot, *, style='compact'):
             raise ValueError(f'{endpoint}: {error}')
     if start == end:
         return view_sentence(start, style=style)
+    if style == 'compact':
+        labels = {'space': '场景', 'position': '机位', 'direction': '朝向', 'height': '高度',
+                  'subject': '主拍', 'foreground': '前景', 'background': '背景'}
+        changes = []
+        for field, label in labels.items():
+            if start[field] != end[field]:
+                value = end[field]
+                if isinstance(value, list):
+                    value = '、'.join(value) or '无'
+                elif value is None:
+                    value = '无人物主拍'
+                changes.append(label + str(value))
+        return '起镜：' + view_sentence(start, style=style) + '落幅：' + '，'.join(changes) + '。'
     return '起始时，' + view_sentence(start, style=style) + '结束时，' + view_sentence(end, style=style)
 
 
@@ -108,6 +130,6 @@ def check_view_binding(shot, camera_values, label, errors):
         errors.append(f'{label}: {exc}')
         return
     normalize = lambda value: ' '.join(value.split())
-    alternatives = (evidence, camera_view_prose(shot, style='legacy'))
+    alternatives = (evidence, camera_view_prose(shot, style='expanded'), camera_view_prose(shot, style='legacy'))
     if not any(normalize(candidate) in normalize(value) for candidate in alternatives for value in camera_values):
         errors.append(f'{label}: camera view evidence is absent from this final camera interval')

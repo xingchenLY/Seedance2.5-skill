@@ -28,11 +28,7 @@ speech.performance写引号外说明；narration须明确中性／平稳，人�
 
 ## 长旁白视觉记录
 
-先按 [旁白画面信息覆盖](narration-coverage.md) 维护 `segment.narration_coverage`，将本段完整旁白映射到具体观看任务及已有实际镜头。累计旁白超过6秒，或存在总长超过6秒的旁白镜头时必填，短旁白仍按同口径内容复核。
-
-任何承载叙事旁白且整个镜头超过6秒的实际镜头，默认重分；确需保留才按 [镜头设计与长镜复核](narration-editing.md) 填 `narration_visual`：保留 `mode: progression`、原文任务依据 `basis` 与覆盖本镜的 `beats`；另填 `long_take` 的 `reason/why_uncut/finish_evidence/cut_review`，各阶段填写 `change/new_information`，绑定到本阶段 `visual_evidence`。完整格式与取舍标准只维护在该专题。
-
-不能仅填两条不同的表情描述就放行长镜。声音完整不等于一镜到底；先按信息节点安排实际镜头，再决定是否保留长镜。渲染器仍只把分时画面证据接入原“画面内容”，不输出内部理由或重复 `visual_text`。默认约2–4秒的观看任务，4–6秒须有必要过程；超过6秒需额外比较具体切点及不切的必要价值，不按固定秒数机械切；原有2秒静态上限与旁白连读检查保持不变。
+按 [旁白画面信息覆盖](narration-coverage.md) 维护 `segment.narration_coverage`，累计旁白超过6秒时必填；短旁白同样按原文检查画面。完整原声可覆盖多个镜头，每个承载叙事旁白的实际镜头严格小于3秒，按全镜计时。旧 `narration_visual` 仍可读取并校验内容，但不批准超时长镜；新制作不用填写旧长镜理由。详细口径见 [连续旁白切镜](narration-editing.md)。
 
 ## 跨类别同期记录
 

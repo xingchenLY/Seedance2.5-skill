@@ -128,8 +128,8 @@ class CameraViewTests(unittest.TestCase):
         first['end_view']['position'] = '长桌南侧偏西'
         first['camera_text'] = '从起始位置沿桌侧向西移动，保持 Mara 为主拍，落稳后切出。'
         derived, text = render_plan(plan)
-        self.assertIn('起始时，', text)
-        self.assertIn('结束时，', text)
+        self.assertIn('起镜：', text)
+        self.assertIn('落幅：', text)
         self.assertEqual(validate_delivery(derived, text, require_review=False), [])
 
     def test_camera_prose_cannot_be_removed_after_rehash(self):

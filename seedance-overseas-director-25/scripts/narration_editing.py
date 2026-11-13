@@ -14,6 +14,18 @@ DEFAULT_CUT = '内部硬切至本镜。'
 TRANSITIONS = re.compile(r'硬切|跳切|切至|切到|切入|切回|切换到|叠化|叠切|淡入|淡出|划像|匹配剪辑|甩镜转场')
 
 
+def check_narrated_duration(segment, shot, errors):
+    # Decimal distinguishes 2.999 from 3.0 without subtraction rounding.
+    from decimal import Decimal
+    start, end = Decimal(str(shot['start'])), Decimal(str(shot['end']))
+    narrated = any(v.get('kind') == 'narration' and
+                   min(end, Decimal(str(v['end']))) > max(start, Decimal(str(v['start'])))
+                   for v in segment.get('speech', []))
+    if narrated and end - start >= Decimal('3'):
+        errors.append(f'{segment["id"]}/{shot["start"]}: narrated actual shot must be strictly < 3 seconds; '
+                      'whole-shot duration applies, and a long-take justification cannot waive this limit')
+
+
 def nonempty(value):
     return isinstance(value, str) and bool(value.strip()) and '\n' not in value and '\r' not in value
 

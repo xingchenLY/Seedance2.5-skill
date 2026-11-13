@@ -187,6 +187,18 @@ class NarrationFlowTests(unittest.TestCase):
         second['speech'][0].update(start=0, end=4, estimated_seconds=4,
                                   boundary_before=boundary('closed the door', 'before anyone'))
         authored['segments'].append(second)
+        # Preserve both four-second clauses and add actual internal views;
+        # no narrated shot may inherit the whole clause duration.
+        for segment in (first, second):
+            shot = segment['shots'][0]
+            shot['end'] = 2
+            following = deepcopy(shot)
+            following.update(start=2, end=4, start_scale='中近景', end_scale='中近景')
+            following.update(start_camera=segment['id'] + '-east-middle', end_camera=segment['id'] + '-east-middle')
+            following['view']['position'] = '长桌东侧中部斜前方'
+            if segment is second:
+                following['view'].update(subject='Mara', foreground=['Elias'], direction='北侧Mara', background='北窗')
+            segment['shots'].append(following)
         self.assert_valid(authored)
         second['speech'][0].update(start=.4, estimated_seconds=3.6)
         with self.assertRaisesRegex(ValueError, 'unexplained speech gap'):

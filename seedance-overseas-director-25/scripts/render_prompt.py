@@ -44,6 +44,16 @@ def fmt(value):
     return result.rstrip('0').rstrip('.') if '.' in result else result
 
 
+def unique_parts(*parts):
+    # Only eliminate an identical whole fragment already present. No semantic
+    # rewrite, sentence deletion, speech deduplication or loss of bound evidence.
+    result = ''
+    for part in parts:
+        if part and part not in result:
+            result += part
+    return result
+
+
 def prepare_plan(authored):
     from narrative_budget import check_narrative_budgets
     budget_errors = check_narrative_budgets(authored)
@@ -135,15 +145,13 @@ def render_plan(authored):
                 cameras, visuals = [], []
                 for shot in (s for s in segment['shots'] if s['frame_id'] == fid):
                     camera = line(shot['camera_text'], 'camera_text')
-                    camera = camera_view_prose(shot) + jump_cut_prose(shot) + camera + closeup_prose(shot)
+                    camera = unique_parts(camera_view_prose(shot), jump_cut_prose(shot), camera, closeup_prose(shot))
                     if cameras:
                         camera = internal_cut_prose(shot) + camera
-                    visual = (line(shot['visual_text'], 'visual_text') + action_prose(segment, shot, actions)
-                              + relation_layout_prose(shot)
-                              + speech_carry_prose(segment, shot, voice_context)
-                              + isolation_prose(segment, shot)
-                              + static_span_prose(shot) + narration_visual_prose(shot)
-                              + reception_prose(segment, shot, reactions))
+                    visual = unique_parts(line(shot['visual_text'], 'visual_text'), action_prose(segment, shot, actions),
+                                          relation_layout_prose(shot), speech_carry_prose(segment, shot, voice_context),
+                                          isolation_prose(segment, shot), static_span_prose(shot),
+                                          narration_visual_prose(shot), reception_prose(segment, shot, reactions))
                     if TIME_RANGE.search(camera) or TIME_RANGE.search(visual):
                         raise ValueError('Shot text must not duplicate interval labels; use 第 X 秒 for action cues')
                     scale = shot['start_scale']

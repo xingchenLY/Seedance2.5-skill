@@ -13,8 +13,10 @@ from timing_overlap_review import review_timing_overlap, gap_summary
 from shoulder_axis_review import review_shoulder_axis
 from scene_presence_review import review_scene_presence
 from shot_pacing import fmt
+from shot_sequence_review import review_shot_sequence
 
 TOPICS = {
+    'shot_sequence': ('Q', '镜头排列：核对相似切点、返回构图的新变化及双人镜观看重点；正常反打可以保留，不能以改写机位或重复反应过检。'),
     'scene_presence': ('P', '在场未入画：核对既定站位与真实取景／遮挡；应可见则补回已有画面，合理画外可保留，不强制同框、移人、补镜或加时。'),
     'shoulder_axis': ('O', '过肩疑点：核对人物自身肩侧、画面侧与真实轴线；移动／镜面等按实际几何复核，不自动左右互换。'),
     'broad_narrative_run': ('B', '连续偏宽：核对空间／身体任务与情绪细节，不设近景配额。'),
@@ -28,6 +30,7 @@ TOPICS = {
 def collect_review_report(plan):
     """Run each original locator once; return lossless items and a shot index."""
     topics = (
+        ('shot_sequence_review.py', review_shot_sequence(plan)),
         ('scene_presence_review.py', review_scene_presence(plan)),
         ('shoulder_axis_review.py', review_shoulder_axis(plan)),
         ('narrative_framing.py', review_narrative_framing(plan)),
@@ -39,7 +42,7 @@ def collect_review_report(plan):
     for source, findings in topics:
         for finding in findings:
             code = finding.get('code', source.removesuffix('.py').removesuffix('_review'))
-            if source in ('narrative_framing.py', 'shoulder_axis_review.py', 'scene_presence_review.py'):
+            if source in ('narrative_framing.py', 'shoulder_axis_review.py', 'scene_presence_review.py', 'shot_sequence_review.py'):
                 locations = [(s['segment_id'], s['start']) for s in finding['shots']]
             elif source == 'timing_overlap_review.py':
                 locations = [(finding['segment_id'], start)
@@ -66,6 +69,9 @@ def collect_review_report(plan):
 def finding_text(item):
     """Keep meaningful ranges and source evidence while removing repeated boilerplate."""
     data, code = item['finding'], item['code']
+    if code == 'shot_sequence':
+        chain = ' → '.join(f"{s['segment_id']}@{fmt(s['start'])}–{fmt(s['end'])}秒" for s in data['shots'])
+        return chain + '；' + data['reason']
     if code == 'scene_presence':
         chain = ' → '.join(f"{s['segment_id']}@{fmt(s['start'])}–{fmt(s['end'])}秒" for s in data['shots'])
         return (f"{'、'.join(data['characters'])}在本次可检查区间的在场表中持续存在，但无可见记录；"

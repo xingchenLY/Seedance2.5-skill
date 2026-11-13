@@ -288,6 +288,8 @@ def check_mode(plan, errors):
                 if not overlap_allowed(plan, segment, voices, fid):
                     errors.append(f'{label}/{fid}: invalid or ungrounded cross-category overlap exception')
         for shot in segment['shots']:
+            from narration_editing import check_narrated_duration
+            check_narrated_duration(segment, shot, errors)
             if mode['narrative']:
                 from narration_mouth import check_shot_mouth
                 check_shot_mouth(segment, shot, [shot.get('camera_text', ''), shot.get('visual_text', '')],

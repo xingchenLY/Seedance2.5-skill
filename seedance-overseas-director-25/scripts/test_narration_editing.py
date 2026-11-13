@@ -51,7 +51,7 @@ def multi_plan(mode='3D漫推文', same_frame=True):
     data = base_plan(mode)
     shots = data['segments'][0]['shots']
     shots.append(deepcopy(shots[0]))
-    for i, (shot, start, end, scale) in enumerate(zip(shots, (0, 3, 5), (3, 5, 8), ('近景', '中近景', '近景'))):
+    for i, (shot, start, end, scale) in enumerate(zip(shots, (0, 2.7, 5.3), (2.7, 5.3, 8), ('近景', '中近景', '近景'))):
         shot.update(start=start, end=end, frame_id='分镜1' if same_frame else f'分镜{i+1}',
                     start_scale=scale, end_scale=scale)
     return data
@@ -94,26 +94,26 @@ class NarrationEditingTests(unittest.TestCase):
 
     def test_concrete_long_take_remains_allowed_without_forced_cuts(self):
         for mode in ('推文', '3D漫推文'):
-            plan, text = render_plan(long_plan(mode))
-            self.assertEqual(len(plan['segments'][0]['shots']), 1)
-            self.assertNotIn(DEFAULT_CUT, text)
-            self.assertNotIn('why_uncut', text)
-            self.assertNotIn('continuous_action', text)
-            review(plan, text)
-            self.assertEqual(validate_delivery(plan, text), [])
+            data = long_plan(mode)
+            before = deepcopy(data)
+            with self.assertRaisesRegex(ValueError, 'strictly < 3'):
+                render_plan(data)
+            self.assertEqual(data, before)
 
     def test_visible_performance_turn_is_not_banned_as_a_facial_expression(self):
+        from mode_rules import check_narrative_visual
         data = long_plan()
-        entry = data['segments'][0]['shots'][0]['narration_visual']
-        phrases = ['Mara试图掩饰的笑容消失，在Elias追问时避开他的视线',
-                   'Mara把已经伸向花束的手收回身侧，抬眼直视Elias']
-        entry['long_take'].update(reason='performance_arc', why_uncut='连续看清从勉强迎合到收回伸手的态度转折',
-                                  finish_evidence=phrases[-1])
+        shot = data['segments'][0]['shots'][0]
+        entry = shot['narration_visual']
+        phrases = ['Mara试图掩饰的笑容消失，在Elias追问时避开他的视线', 'Mara把已经伸向花束的手收回身侧，抬眼直视Elias']
+        entry['long_take'].update(reason='performance_arc', why_uncut='连续看清从勉强迎合到收回伸手的态度转折', finish_evidence=phrases[-1])
         for beat, phrase in zip(entry['beats'], phrases):
             beat.update(change='performance_turn', new_information=phrase, visual_evidence=phrase)
-        plan, text = render_plan(data)
-        review(plan, text)
-        self.assertEqual(validate_delivery(plan, text), [])
+        errors = []
+        check_narrative_visual(shot, True, errors, 'test')
+        self.assertEqual(errors, [])
+        with self.assertRaisesRegex(ValueError, 'strictly < 3'):
+            render_plan(data)
 
     def test_audio_continuity_and_generic_tension_are_not_long_take_reasons(self):
         for why in ('旁白还没讲完', '为了保持旁白连续，所以必须一镜到底', '保持张力', '动作连贯'):
@@ -193,7 +193,7 @@ class NarrationEditingTests(unittest.TestCase):
             changed = text.replace(DEFAULT_CUT, replacement, 1)
             review(plan, changed)
             self.assert_finding(validate_delivery(plan, changed), 'explicit internal cut is missing')
-        changed = text.replace(DEFAULT_CUT, '', 1).replace('运镜：0–3 秒 ', '运镜：0–3 秒 ' + DEFAULT_CUT)
+        changed = text.replace(DEFAULT_CUT, '', 1).replace('运镜：0–2.7 秒 ', '运镜：0–2.7 秒 ' + DEFAULT_CUT)
         review(plan, changed)
         self.assert_finding(validate_delivery(plan, changed), 'explicit internal cut is missing')
 
@@ -203,29 +203,26 @@ class NarrationEditingTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'whole-segment no-cut'):
             render_plan(data)
         plan, text = render_plan(multi_plan())
-        changed = text.replace('运镜：0–3 秒 ', '运镜：0–3 秒 本段全程不切镜。', 1)
+        changed = text.replace('运镜：0–2.7 秒 ', '运镜：0–2.7 秒 本段全程不切镜。', 1)
         review(plan, changed)
         self.assert_finding(validate_delivery(plan, changed), 'whole-segment no-cut')
 
     def test_final_validator_also_checks_changed_metadata_and_visible_progression(self):
-        plan, text = render_plan(long_plan())
-        plan['segments'][0]['shots'][0]['narration_visual']['long_take']['why_uncut'] = '保持旁白连续'
-        review(plan, text)
-        self.assert_finding(validate_delivery(plan, text), 'concrete value of not cutting')
-        plan, text = render_plan(long_plan())
-        phrase = plan['segments'][0]['shots'][0]['narration_visual']['beats'][0]['new_information']
-        changed = text.replace(phrase, 'Mara继续望着Elias')
-        review(plan, changed)
-        self.assert_finding(validate_delivery(plan, changed), 'narration visual progression')
+        plan, text = render_plan(multi_plan())
+        long_shot = deepcopy(long_plan()['segments'][0]['shots'][0])
+        plan['segments'][0]['shots'] = [long_shot]
+        long_shot['narration_visual']['long_take']['why_uncut'] = '保持旁白连续'
+        errors = validate_delivery(plan, text, require_review=False)
+        self.assert_finding(errors, 'strictly < 3')
+        self.assert_finding(errors, 'concrete value of not cutting')
 
     def test_explicit_user_one_take_request_still_needs_visible_progression(self):
         data = long_plan()
         hold = data['segments'][0]['shots'][0]['narration_visual']['long_take']
-        hold.update(reason='user_requested', why_uncut='合成测试用户明确要求本段连续呈现递花和未接花结果')
-        hold['cut_review']['user_basis'] = '合成测试用户指令：本段递花到未接花结果连续拍摄。'
-        plan, text = render_plan(data)
-        review(plan, text)
-        self.assertEqual(validate_delivery(plan, text), [])
+        hold.update(reason='user_requested', why_uncut='旧案例要求连续观察递花')
+        hold['cut_review']['user_basis'] = '旧指令要求长镜；不能覆盖当前小于3秒要求'
+        with self.assertRaisesRegex(ValueError, 'strictly < 3'):
+            render_plan(data)
 
     def test_threshold_is_a_review_trigger_not_a_forced_cut_or_duration_limit(self):
         data = long_plan()
@@ -233,9 +230,8 @@ class NarrationEditingTests(unittest.TestCase):
         segment['shots'][0]['end'] = 6
         segment['speech'][0].update(end=6, estimated_seconds=6)
         del segment['shots'][0]['narration_visual']
-        plan, text = render_plan(data)
-        self.assertEqual(len(plan['segments'][0]['shots']), 1)
-        self.assertNotIn(DEFAULT_CUT, text)
+        with self.assertRaisesRegex(ValueError, 'strictly < 3'):
+            render_plan(data)
 
     def test_drama_modes_do_not_gain_narration_only_metadata_requirements(self):
         for mode in ('真人剧', '3D漫真人剧'):
