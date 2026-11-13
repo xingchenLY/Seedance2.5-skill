@@ -117,7 +117,7 @@ checked 几何检查失败时保留源图，记录 failed 的 quality 错误以�
 
 场景还须按 [空间区分与防重复](visual-specs.md#空间区分与防重复) 对照关联参考及同地点其它空间的实际图片，在现有 `checked.note` 记录对照资产 ID／参考来源、已继承的可见建筑细节与连接关系、目标空间的可见区别；无参考的首张只记录自身设计落实情况，不虚构跨图检查。不同空间出现相同画面或缺少可辨认区分点时，用 `approved=false`、`code=scene_space_not_distinct`；延伸图破坏已确定的建筑细节或可见衔接关系时，用 `code=scene_connection_mismatch` 并拒绝批准。记录具体原因，更新该空间完整提示词及引用后返修，沿用同项本轮生成与质量失败合并累计六次的上限。同一房间仅时间不同复用同一图、跨空间保留共享结构属于连续性，不按跨房间重复处理；不新增脚本字段，不把尺寸或哈希检查说成空间视觉识别。
 
-同次场景审核还须执行 [布局、入口机位与无畸变检查](scene-layout-camera.md)：海外中式化布局／家具用 `scene_regional_style_mismatch`，室内入口机位或入口不可见用 `scene_entry_composition_mismatch`，透视／结构畸变用 `scene_geometry_distortion`，均记录 `approved=false` 与具体可见问题。前景、入口及主要家具须实际查看；同一尝试多种缺陷只计一次质量失败，不新增字段或额外返修预算。国内不适用海外中式风格排除，但机位、入口及几何要求相同。
+同次场景审核还须执行 [布局、入口机位与无畸变检查](scene-layout-camera.md)：海外中式化布局／家具用 `scene_regional_style_mismatch`，违反室内内部机位要求或本图必须展示的入口缺失／不可辨时用 `scene_entry_composition_mismatch`，允许画外或符合用途的局部入口不因此报错，透视／结构畸变用 `scene_geometry_distortion`，均记录 `approved=false` 与具体可见问题。主要功能区、必要家具和要求可见的入口须实际查看；未展示的连接如实记录为本图未验证，不为看门强行扩大取景；同一尝试多种缺陷只计一次质量失败，不新增字段或额外返修预算。国内不适用海外中式风格排除，但机位、按用途展示入口及几何要求相同。
 
 同次场景审核按 [时间与光影专项校验](scene-layout-camera.md#时间与光影专项校验) 及 [影视光影检查](scene-lighting.md#出图检查与表格同步)，记录基准时段、实际可见天色／窗外线索、灯具状态、光源与投影、曝光及修改后整体光影保持情况，结果并入现有 `checked.note`。明显不符时记录具体可见问题，以 `approved=false`、`code=scene_lighting_mismatch` 返修；不以术语数量为验收条件，不增加生成轮次、事件字段或质量失败预算，也不延迟返回结果的待审落盘。
 

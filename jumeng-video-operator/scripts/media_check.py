@@ -36,12 +36,104 @@ def atomic_json(path, data):
     os.replace(temp, path)
 
 
-def run_text(args):
-    result = subprocess.run(args, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE, encoding="utf-8", errors="replace")
+class CheckTimeout(RuntimeError):
+    def __init__(self, details):
+        self.details = details
+        super().__init__(f"{details['phase']} exceeded {details['timeout_seconds']} seconds")
+
+
+class RetryBlocked(ValueError):
+    pass
+
+
+def stop_process(process):
+    """Only stop our child; never wait indefinitely or kill tools by name."""
+    error = None
+    try:
+        if process.poll() is None:
+            process.kill()
+    except OSError as exc:
+        error = str(exc)
+    try:
+        process.communicate(timeout=5)
+        return process.poll() is not None, error
+    except (OSError, subprocess.SubprocessError) as exc:
+        return False, str(exc)
+
+
+def run_process(command, *, timeout, phase, notify=None, **kwargs):
+    process = subprocess.Popen(command, stdin=subprocess.DEVNULL,
+                               creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0), **kwargs)
+    try:
+        if notify:
+            notify({"phase": phase, "pid": process.pid, "state": "running",
+                    "timeout_seconds": timeout, "started_at": time.time()})
+        stdout, stderr = process.communicate(timeout=timeout)
+    except subprocess.TimeoutExpired:
+        confirmed, error = stop_process(process)
+        details = {"phase": phase, "pid": process.pid, "state": "timed_out",
+                   "timeout_seconds": timeout, "termination_confirmed": confirmed,
+                   "returncode": process.poll(), "termination_error": error}
+        if notify:
+            notify(details)
+        raise CheckTimeout(details)
+    except BaseException:
+        # Includes failure to persist the running PID and interruption of this wrapper.
+        confirmed, error = stop_process(process)
+        if notify:
+            notify({"phase": phase, "pid": process.pid, "state": "interrupted",
+                    "termination_confirmed": confirmed, "returncode": process.poll(),
+                    "termination_error": error})
+        raise
+    if notify:
+        notify({"phase": phase, "pid": process.pid, "state": "completed",
+                "termination_confirmed": True, "returncode": process.returncode})
+    return subprocess.CompletedProcess(command, process.returncode, stdout, stderr)
+
+
+def run_text(args, *, timeout, phase, notify=None):
+    result = run_process(args, timeout=timeout, phase=phase, notify=notify,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         encoding="utf-8", errors="replace")
     if result.returncode:
         raise RuntimeError(f"{Path(args[0]).name} failed: {result.stderr[-2000:]}")
     return result.stdout
+
+
+def claim_timeout_retry(args, report, history_path):
+    """A finished timeout report can authorize exactly one successor, including after restart."""
+    parent_path = Path(args.retry_from_report).resolve()
+    if parent_path == history_path.parent.parent / "report.json":
+        raise RetryBlocked("Use the immutable reports/...json path, not report.json")
+    try:
+        parent = json.loads(parent_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as error:
+        raise RetryBlocked(f"Cannot read retry report: {error}") from error
+    if (parent_path.parent != history_path.parent or not isinstance(parent, dict)
+            or not isinstance(parent.get("report"), str) or Path(parent["report"]).resolve() != parent_path):
+        raise RetryBlocked("Use the original immutable report in this check directory")
+    timeout = parent.get("timeout", {})
+    retry = parent.get("timeout_retry", {})
+    if not isinstance(timeout, dict) or not isinstance(retry, dict):
+        raise RetryBlocked("Retry report has invalid timeout metadata")
+    if (parent.get("status") != "pending" or not timeout.get("termination_confirmed")
+            or parent.get("active_process") or parent.get("pending_reasons") != ["technical_check_timeout"]):
+        raise RetryBlocked("Previous timeout process is not confirmed ended or report is not eligible")
+    if retry.get("used") != 0:
+        raise RetryBlocked("The one automatic timeout retry is exhausted")
+    if (not parent.get("sha256") or parent["sha256"] != report.get("sha256")
+            or parent.get("check_identity") != report["check_identity"]
+            or parent.get("targets") != report["targets"]):
+        raise RetryBlocked("Retry source, check mode, script or targets changed; reconcile first")
+    claim_path = parent_path.with_suffix(".retry.json")
+    try:
+        with claim_path.open("x", encoding="utf-8") as stream:
+            json.dump({"parent_report": str(parent_path), "child_report": str(history_path),
+                       "source_sha256": report["sha256"], "claimed_at": time.time()}, stream)
+    except FileExistsError as error:
+        raise RetryBlocked("This timeout report already has a retry; reconcile its child report") from error
+    report["timeout_retry"] = {"used": 1, "limit": 1, "parent_report": str(parent_path),
+                               "claim": str(claim_path)}
 
 
 def number(value):
@@ -160,21 +252,32 @@ def inspect(args):
     output = Path(args.output).resolve()
     output.mkdir(parents=True, exist_ok=True)
     report_path = output / "report.json"
+    history_path = output / "reports" / (uuid.uuid4().hex + ".json")
     video = Path(args.video).resolve()
     download = Path(args.download).resolve() if args.download else None
     if video == report_path or download == report_path:
         raise ValueError("Report path must not overwrite an input")
-    report = {"status": "error", "video": str(video), "visual_review": "not_performed",
+    report = {"status": "error", "report": str(history_path), "video": str(video), "visual_review": "not_performed",
               "voice_review": "not_performed", "timings_seconds": {}, "cache_hit": False,
+              "active_process": None, "process_runs": [],
+              "timeout_retry": {"used": 0, "limit": 1},
+              "timeouts": {"probe_seconds": args.probe_timeout, "decode_seconds": args.decode_timeout},
+              "check_identity": {"script_sha256": sha256(__file__), "contact_sheet": args.contact_sheet},
               "targets": {"seconds": args.expected_seconds, "display_width": args.expected_width,
                           "display_height": args.expected_height}}
+
+    def notify_process(event):
+        report["status"] = "running"
+        report["process_runs"].append(event)
+        report["active_process"] = (event if event["state"] == "running"
+                                    or not event.get("termination_confirmed", False) else None)
+        atomic_json(history_path, report)
+        atomic_json(report_path, report)
+
     try:
         initial = signature(video)
         download_initial = signature(download) if download else None
         same_input = download is not None and video.samefile(download)
-        versions = {"ffmpeg": run_text([args.ffmpeg, "-version"]).splitlines()[0],
-                    "ffprobe": run_text([args.ffprobe, "-version"]).splitlines()[0]}
-        report["tools"] = versions
         stamp = time.perf_counter()
         video_hash = sha256(video)
         report["sha256"] = video_hash
@@ -184,7 +287,13 @@ def inspect(args):
                               "status": "unknown" if download is None else ("matched" if video_hash == download_hash else "mismatch"),
                               "distinct_path": download is not None and download != video,
                               "same_file": same_input, "hash_reused": same_input}
-        key = {"video_sha256": video_hash, "script_sha256": sha256(__file__),
+        if args.retry_from_report:
+            claim_timeout_retry(args, report, history_path)
+        versions = {name: run_text([tool, "-version"], timeout=args.probe_timeout,
+                                  phase=name + "_version", notify=notify_process).splitlines()[0]
+                    for name, tool in (("ffmpeg", args.ffmpeg), ("ffprobe", args.ffprobe))}
+        report["tools"] = versions
+        key = {"video_sha256": video_hash, "script_sha256": report["check_identity"]["script_sha256"],
                "tools": versions}
         cache_id = hashlib.sha256(json.dumps(key, sort_keys=True).encode()).hexdigest()
         cache_dir = output / cache_id
@@ -205,7 +314,8 @@ def inspect(args):
         if not cached or (args.contact_sheet and not sheet_cached):
             run_dir = Path(tempfile.mkdtemp(prefix="run-", dir=cache_dir))
             if not cached:
-                probe = json.loads(run_text([args.ffprobe, "-v", "error", "-show_streams", "-show_format", "-of", "json", str(video)]))
+                probe = json.loads(run_text([args.ffprobe, "-v", "error", "-show_streams", "-show_format", "-of", "json", str(video)],
+                                            timeout=args.probe_timeout, phase="probe", notify=notify_process))
             actual = summarize(probe)  # Reject ambiguous video selection before caching.
             probe_path = run_dir / "probe.json"
             atomic_json(probe_path, probe)
@@ -223,8 +333,10 @@ def inspect(args):
             else:
                 command += ["-map", "0:v", "-map", "0:a?", "-f", "null", "-"]
             with log_path.open("w", encoding="utf-8") as log:
-                process = subprocess.run(command, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                         stderr=log)
+                report["work_directory"] = str(run_dir)
+                process = run_process(command, timeout=args.decode_timeout,
+                                      phase="sheets" if args.contact_sheet and cached else "decode",
+                                      notify=notify_process, stdout=subprocess.DEVNULL, stderr=log)
             sheets = sorted(run_dir.glob("sheet-*.jpg"))
             passed = process.returncode == 0 and not log_path.read_text(encoding="utf-8", errors="replace").strip()
             if args.contact_sheet and not sheets:
@@ -269,10 +381,21 @@ def inspect(args):
             reasons.append("input_changed_during_check")
         report["pending_reasons"] = reasons
         report["status"] = "pending" if reasons else "passed"
-    except (OSError, ValueError, RuntimeError, KeyError, subprocess.SubprocessError) as error:
+    except CheckTimeout as error:
+        report["status"] = "pending"
+        report["timeout"] = error.details
+        report["pending_reasons"] = ["technical_check_timeout"]
+        report["timeout_retry"]["eligible"] = (error.details["termination_confirmed"]
+                                               and report["timeout_retry"]["used"] < 1)
+        report["error"] = str(error)
+    except RetryBlocked as error:
+        report["status"] = "pending"
+        report["pending_reasons"] = ["timeout_retry_blocked"]
+        report["error"] = str(error)
+    except (OSError, ValueError, RuntimeError, KeyError, IndexError, subprocess.SubprocessError) as error:
+        report["status"] = "error"
         report["error"] = str(error)
     report["timings_seconds"]["total"] = time.perf_counter() - start
-    history_path = output / "reports" / (uuid.uuid4().hex + ".json")
     atomic_json(history_path, report)
     atomic_json(report_path, report)
     print(json.dumps({"status": report["status"], "report": str(history_path), "latest_report": str(report_path),
@@ -305,6 +428,12 @@ def main():
     parser.add_argument("--ffmpeg", default="ffmpeg")
     parser.add_argument("--ffprobe", default="ffprobe")
     parser.add_argument("--contact-sheet", action="store_true")
+    parser.add_argument("--probe-timeout", type=positive_float, default=30,
+                        help="Seconds per version/metadata subprocess (default: 30)")
+    parser.add_argument("--decode-timeout", type=positive_float, default=180,
+                        help="Seconds per decode/contact-sheet subprocess (default: 180)")
+    parser.add_argument("--retry-from-report",
+                        help="Immutable timeout report authorizing the one automatic retry")
     args = parser.parse_args()
     try:
         return inspect(args)
